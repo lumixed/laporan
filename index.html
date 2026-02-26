@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LaporIn – Suara Warga untuk Perubahan Nyata</title>
+    <meta name="description"
+        content="Laporkan masalah infrastruktur, lingkungan, dan fasilitas umum di sekitar Anda. Bersama kita wujudkan Indonesia yang lebih baik." />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📢</text></svg>" />
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">
+            <div class="logo-icon">📢</div>
+            LaporIn
+        </a>
+        <ul class="navbar-nav">
+            <li><a href="feed.html">Semua Laporan</a></li>
+            <li><a href="submit.html">Buat Laporan</a></li>
+            <li><a href="dashboard.html">Dashboard Pemerintah</a></li>
+        </ul>
+        <div class="navbar-actions">
+            <a href="submit.html" class="btn btn-primary">
+                📸 Laporkan Sekarang
+            </a>
+        </div>
+        <button class="hamburger btn btn-ghost" onclick="toggleMenu()" id="hamburger">☰</button>
+    </nav>
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="feed.html">📋 Semua Laporan</a>
+        <a href="submit.html">📸 Buat Laporan</a>
+        <a href="dashboard.html">🏛️ Dashboard Pemerintah</a>
+    </div>
+
+    <!-- HERO -->
+    <section class="hero" style="padding-top: 64px;">
+        <div class="container"
+            style="display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; padding-top: 60px; padding-bottom: 60px;">
+            <div class="hero-content">
+                <div class="hero-tag animate-in">
+                    🇮🇩 Untuk Indonesia yang Lebih Baik
+                </div>
+                <h1 class="animate-in-delay-1">
+                    Lihat Masalah?<br>
+                    <span>Laporkan!</span><br>
+                    Pantau Hasilnya.
+                </h1>
+                <p class="animate-in-delay-2">
+                    Foto, kirim, dan pantau laporan masalah di sekitar Anda — dari jalan berlubang hingga sungai kotor.
+                    Bersama kita paksa pemerintah bertindak.
+                </p>
+                <div class="hero-btns animate-in-delay-3">
+                    <a href="submit.html" class="btn btn-primary btn-lg">
+                        📸 Laporkan Sekarang
+                    </a>
+                    <a href="feed.html" class="btn btn-secondary btn-lg"
+                        style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); color: white;">
+                        📋 Lihat Laporan
+                    </a>
+                </div>
+            </div>
+            <div style="position: relative;">
+                <div class="hero-image">
+                    <img src="assets/hero.png" alt="Warga Indonesia melaporkan masalah kota"
+                        style="width: 100%; height: 420px; object-fit: cover;" />
+                </div>
+                <!-- Floating badges -->
+                <div class="floating-badge" style="bottom: 20px; left: -30px; animation-delay: 0s;">
+                    <div class="badge-icon">✅</div>
+                    <div>
+                        <div class="badge-text">Laporan Selesai!</div>
+                        <div class="badge-sub">Jalan Sudirman sudah diperbaiki</div>
+                    </div>
+                </div>
+                <div class="floating-badge" style="top: 20px; right: -20px; animation-delay: 1.5s;">
+                    <div class="badge-icon">🔥</div>
+                    <div>
+                        <div class="badge-text">312 Warga Mendukung</div>
+                        <div class="badge-sub">Laporan Sungai Brantas</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- LIVE STATS -->
+    <section class="section" style="background: white; padding: 48px 0;">
+        <div class="container">
+            <div class="grid grid-4" id="statsGrid">
+                <div class="stat-card animate-in">
+                    <div class="stat-icon">📋</div>
+                    <div class="stat-number" id="statTotal">0</div>
+                    <div class="stat-label">Total Laporan Masuk</div>
+                </div>
+                <div class="stat-card animate-in-delay-1">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-number" id="statResolved">0</div>
+                    <div class="stat-label">Laporan Diselesaikan</div>
+                </div>
+                <div class="stat-card animate-in-delay-2">
+                    <div class="stat-icon">🏙️</div>
+                    <div class="stat-number" id="statCities">0</div>
+                    <div class="stat-label">Kota & Kabupaten</div>
+                </div>
+                <div class="stat-card animate-in-delay-3">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-number" id="statVolunteers">0</div>
+                    <div class="stat-label">Warga Aktif</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="section" style="background: var(--gray-50);">
+        <div class="container">
+            <div class="text-center mb-8">
+                <div class="section-tag">Cara Kerja</div>
+                <h2 class="section-title">3 Langkah Mudah untuk Perubahan</h2>
+                <p class="section-sub" style="margin: 0 auto;">Tidak perlu antre di kantor kelurahan. Laporkan masalah
+                    dari mana saja, kapan saja — dalam 30 detik.</p>
+            </div>
+            <div class="grid grid-3">
+                <div class="how-step card" style="padding: 32px 24px;">
+                    <div class="step-icon">📸</div>
+                    <div class="step-number">1</div>
+                    <h3 style="margin-top: 16px; margin-bottom: 8px; font-size: 1.1rem; font-weight: 700;">Foto
+                        Masalahnya</h3>
+                    <p style="color: var(--gray-500); font-size: 0.9rem;">Ambil foto jalan berlubang, sampah menumpuk,
+                        atau masalah lingkungan di sekitar Anda.</p>
+                </div>
+                <div class="how-step card" style="padding: 32px 24px;">
+                    <div class="step-icon">📍</div>
+                    <div class="step-number">2</div>
+                    <h3 style="margin-top: 16px; margin-bottom: 8px; font-size: 1.1rem; font-weight: 700;">Kirim Laporan
+                    </h3>
+                    <p style="color: var(--gray-500); font-size: 0.9rem;">Tambahkan deskripsi singkat. Lokasi GPS
+                        otomatis terdeteksi. Pilih kategori, lalu kirim!</p>
+                </div>
+                <div class="how-step card" style="padding: 32px 24px;">
+                    <div class="step-icon">📊</div>
+                    <div class="step-number">3</div>
+                    <h3 style="margin-top: 16px; margin-bottom: 8px; font-size: 1.1rem; font-weight: 700;">Pantau
+                        Progres</h3>
+                    <p style="color: var(--gray-500); font-size: 0.9rem;">Terima notifikasi saat laporan diproses. Lihat
+                        status hingga masalah benar-benar selesai.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- RECENT REPORTS -->
+    <section class="section section-alt">
+        <div class="container">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; flex-wrap: wrap; gap: 16px;">
+                <div>
+                    <div class="section-tag">Laporan Terbaru</div>
+                    <h2 class="section-title" style="margin: 0;">Yang Sedang Diperjuangkan Warga</h2>
+                </div>
+                <a href="feed.html" class="btn btn-secondary">Lihat Semua →</a>
+            </div>
+            <div class="grid grid-3" id="recentReports">
+                <!-- Filled by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- GAMIFICATION / WHY JOIN -->
+    <section class="section" style="background: linear-gradient(135deg, var(--gray-900), #1a0a0a);">
+        <div class="container">
+            <div class="text-center mb-8">
+                <div class="section-tag" style="background: rgba(230,57,70,0.2); color: var(--red-light);">Penghargaan
+                </div>
+                <h2 class="section-title" style="color: white;">Jadi Pahlawan Kotamu</h2>
+                <p class="section-sub" style="color: var(--gray-400); margin: 0 auto;">Setiap laporan yang kamu kirim
+                    meningkatkan poinmu. Raih badge dan masuk papan peringkat kota!</p>
+            </div>
+            <div class="grid grid-4" id="achievementsGrid">
+                <!-- Filled by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- LEADERBOARD PREVIEW -->
+    <section class="section section-alt">
+        <div class="container">
+            <div class="text-center mb-8">
+                <div class="section-tag">Papan Peringkat</div>
+                <h2 class="section-title">Warga Paling Aktif Minggu Ini</h2>
+            </div>
+            <div style="max-width: 600px; margin: 0 auto;" id="leaderboardList">
+                <!-- Filled by JS -->
+            </div>
+            <div class="text-center mt-6">
+                <a href="feed.html" class="btn btn-primary btn-lg">Lihat Semua Laporan & Bergabung</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <div class="grid grid-4" style="gap: 32px; margin-bottom: 0;">
+                <div>
+                    <div class="footer-logo">📢 LaporIn</div>
+                    <p class="footer-tagline" style="margin-top: 8px;">Platform pelaporan masalah publik untuk Indonesia
+                        yang lebih baik.</p>
+                    <div style="margin-top: 16px; font-size: 1.5rem;">🇮🇩</div>
+                </div>
+                <div>
+                    <div style="font-weight: 700; color: white; margin-bottom: 12px; font-size: 0.9rem;">Warga</div>
+                    <div class="footer-links">
+                        <a href="submit.html">📸 Buat Laporan</a>
+                        <a href="feed.html">📋 Semua Laporan</a>
+                        <a href="feed.html">🏆 Papan Peringkat</a>
+                    </div>
+                </div>
+                <div>
+                    <div style="font-weight: 700; color: white; margin-bottom: 12px; font-size: 0.9rem;">Pemerintah
+                    </div>
+                    <div class="footer-links">
+                        <a href="dashboard.html">🏛️ Dashboard</a>
+                        <a href="#">📊 Laporan Kinerja</a>
+                        <a href="#">🤝 Integrasi LAPOR!</a>
+                    </div>
+                </div>
+                <div>
+                    <div style="font-weight: 700; color: white; margin-bottom: 12px; font-size: 0.9rem;">Tentang</div>
+                    <div class="footer-links">
+                        <a href="#">❓ FAQ</a>
+                        <a href="#">📞 Kontak</a>
+                        <a href="#">🔒 Privasi</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>© 2025 LaporIn. Dibuat dengan ❤️ untuk Indonesia.</span>
+                <span>Bersama kita bisa! 🇮🇩</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast">
+        <div class="toast-icon">🎉</div>
+        <div>
+            <div class="toast-title">Selamat datang di LaporIn!</div>
+            <div class="toast-body">Bersama kita wujudkan Indonesia yang lebih baik.</div>
+        </div>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script>
+        // Init
+        initData();
+
+        // Animate counters
+        function animateCounter(el, target, suffix = '') {
+            let current = 0;
+            const step = Math.ceil(target / 60);
+            const timer = setInterval(() => {
+                current = Math.min(current + step, target);
+                el.textContent = current.toLocaleString('id-ID') + suffix;
+                if (current >= target) clearInterval(timer);
+            }, 30);
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            animateCounter(document.getElementById('statTotal'), APP_STATS.totalReports);
+            animateCounter(document.getElementById('statResolved'), APP_STATS.resolved);
+            animateCounter(document.getElementById('statCities'), APP_STATS.cities);
+            animateCounter(document.getElementById('statVolunteers'), APP_STATS.volunteers);
+        });
+
+        // Recent reports
+        const reports = loadReports().slice(0, 3);
+        document.getElementById('recentReports').innerHTML = reports.map(r => {
+            const cat = getCategory(r.category);
+            const st = getStatus(r.status);
+            return `
+      <div class="report-card" onclick="location.href='report.html?id=${r.id}'">
+        <img class="report-card-img" src="${r.photo}" alt="${r.title}" onerror="this.style.background='#eee';this.src='';" />
+        <div class="report-card-body">
+          <div class="report-card-header">
+            <div class="report-card-title">${r.title}</div>
+            <span class="badge badge-${r.status}">${st.icon} ${st.label}</span>
+          </div>
+          <div style="font-size: 0.82rem; color: var(--gray-500); margin-top: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${r.description}</div>
+          <div class="report-card-meta">
+            <span>${cat.icon} ${cat.label}</span>
+            <span>📍 ${r.city}</span>
+            <span>⏱️ ${timeAgo(r.createdAt)}</span>
+          </div>
+          <div class="report-card-footer">
+            <span class="badge badge-cat">👤 ${r.reporter}</span>
+            <div class="upvote-btn">
+              <span class="icon">👍</span> ${r.upvotes.toLocaleString('id-ID')}
+            </div>
+          </div>
+        </div>
+      </div>`;
+        }).join('');
+
+        // Achievements
+        document.getElementById('achievementsGrid').innerHTML = ACHIEVEMENTS.map(a => `
+    <div class="achievement-card" style="flex-direction: column; text-align: center; background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1);">
+      <div style="font-size: 2.8rem; margin-bottom: 8px;">${a.icon}</div>
+      <div class="achievement-name" style="color: white;">${a.name}</div>
+      <div class="achievement-desc" style="color: var(--gray-400);">${a.desc}</div>
+      <div style="margin-top: 8px; font-weight: 800; color: var(--yellow);">+${a.points} poin</div>
+    </div>`).join('');
+
+        // Leaderboard
+        document.getElementById('leaderboardList').innerHTML = LEADERBOARD.map((u, i) => `
+    <div style="display: flex; align-items: center; gap: 16px; padding: 16px 20px; background: white; border-radius: var(--radius); margin-bottom: 12px; border: 1px solid var(--gray-200); box-shadow: var(--shadow-sm);">
+      <div style="font-size: ${i === 0 ? '1.8rem' : '1.4rem'}; width: 40px; text-align: center;">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`}</div>
+      <div style="flex: 1;">
+        <div style="font-weight: 700;">${u.name}</div>
+        <div style="font-size: 0.82rem; color: var(--gray-500);">📍 ${u.city} · ${u.badge}</div>
+      </div>
+      <div style="text-align: right;">
+        <div style="font-weight: 800; color: var(--red);">${u.reports} laporan</div>
+        <div style="font-size: 0.78rem; color: var(--yellow); font-weight: 700;">${u.points.toLocaleString('id-ID')} poin</div>
+      </div>
+    </div>`).join('');
+
+        // Mobile menu
+        function toggleMenu() {
+            document.getElementById('mobileMenu').classList.toggle('open');
+        }
+
+        // Toast
+        setTimeout(() => {
+            const t = document.getElementById('toast');
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 4000);
+        }, 1500);
+    </script>
+</body>
+
+</html>

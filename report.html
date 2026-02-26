@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Detail Laporan – LaporIn</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📢</text></svg>" />
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">
+            <div class="logo-icon">📢</div>LaporIn
+        </a>
+        <ul class="navbar-nav">
+            <li><a href="feed.html">Semua Laporan</a></li>
+            <li><a href="submit.html">Buat Laporan</a></li>
+            <li><a href="dashboard.html">Dashboard Pemerintah</a></li>
+        </ul>
+        <div class="navbar-actions">
+            <a href="submit.html" class="btn btn-primary">📸 Laporkan Sekarang</a>
+        </div>
+    </nav>
+
+    <div class="page-content">
+        <div class="container">
+            <!-- Back button -->
+            <a href="feed.html"
+                style="display: inline-flex; align-items: center; gap: 6px; color: var(--gray-500); font-weight: 600; font-size: 0.9rem; margin-bottom: 24px;">
+                ← Kembali ke Semua Laporan
+            </a>
+
+            <div id="reportContent"
+                style="display: grid; grid-template-columns: 1fr 380px; gap: 32px; align-items: start;">
+                <!-- Main -->
+                <div>
+                    <!-- Photo -->
+                    <div class="card mb-6" style="overflow: hidden;">
+                        <img id="reportPhoto" src="" alt="Foto laporan"
+                            style="width: 100%; max-height: 480px; object-fit: cover;" />
+                    </div>
+
+                    <!-- Title & badges -->
+                    <div class="card mb-6" style="padding: 24px;">
+                        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;" id="reportBadges">
+                        </div>
+                        <h1 id="reportTitle"
+                            style="font-size: 1.5rem; font-weight: 800; line-height: 1.3; margin-bottom: 12px;"></h1>
+                        <div style="display: flex; gap: 16px; font-size: 0.85rem; color: var(--gray-500); flex-wrap: wrap;"
+                            id="reportMeta"></div>
+                        <div style="margin-top: 16px; line-height: 1.8; color: var(--gray-700);" id="reportDesc"></div>
+
+                        <!-- Action buttons -->
+                        <div style="display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap;">
+                            <button class="upvote-btn" id="mainUpvote" onclick="toggleUpvote()"
+                                style="padding: 10px 20px; font-size: 0.95rem;">
+                                <span class="icon">👍</span> Dukung Laporan ini <span id="upvoteCount"
+                                    style="font-weight: 800;"></span>
+                            </button>
+                            <button class="btn btn-secondary" onclick="shareWhatsApp()">📱 Bagikan ke WhatsApp</button>
+                            <button class="btn btn-ghost" onclick="shareInstagram()">📸 Bagikan ke Instagram</button>
+                        </div>
+                    </div>
+
+                    <!-- Map -->
+                    <div class="card mb-6" style="overflow: hidden;">
+                        <div style="padding: 16px 20px; border-bottom: 1px solid var(--gray-200);">
+                            <strong>📍 Lokasi Kejadian</strong>
+                        </div>
+                        <div id="detailMap" style="height: 280px;"></div>
+                        <div style="padding: 12px 20px; background: var(--gray-50); font-size: 0.85rem; color: var(--gray-600);"
+                            id="reportAddress"></div>
+                    </div>
+
+                    <!-- Comments -->
+                    <div class="card" style="padding: 24px;">
+                        <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 20px;">💬 Komentar Warga</h3>
+                        <div id="commentsList"></div>
+                        <div style="margin-top: 16px; display: flex; gap: 12px;">
+                            <input type="text" class="form-control" id="commentInput"
+                                placeholder="Tambahkan komentar..." />
+                            <button class="btn btn-primary" onclick="addComment()">Kirim</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div>
+                    <!-- Status Timeline -->
+                    <div class="card mb-6" style="padding: 24px;">
+                        <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 20px;">📊 Status & Progres</h3>
+                        <div class="timeline" id="statusTimeline"></div>
+                    </div>
+
+                    <!-- Department info -->
+                    <div class="card mb-6" style="padding: 20px;" id="deptCard">
+                        <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 12px;">🏛️ Dinas Penanganan</h4>
+                        <div id="deptInfo" style="font-size: 0.88rem; color: var(--gray-600);"></div>
+                    </div>
+
+                    <!-- Reporter info -->
+                    <div class="card mb-6" style="padding: 20px;">
+                        <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 12px;">👤 Dilaporkan Oleh</h4>
+                        <div style="display: flex; align-items: center; gap: 12px;" id="reporterInfo"></div>
+                    </div>
+
+                    <!-- Related reports -->
+                    <div class="card" style="padding: 20px;">
+                        <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 12px;">📋 Laporan Terkait</h4>
+                        <div id="relatedReports"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast" style="border-left-color: var(--red);">
+        <div class="toast-icon">👍</div>
+        <div>
+            <div class="toast-title" id="toastTitle"></div>
+            <div class="toast-body" id="toastBody"></div>
+        </div>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        initData();
+        const params = new URLSearchParams(window.location.search);
+        const reportId = params.get('id') || 'RPT-001';
+        let reports = loadReports();
+        let report = reports.find(r => r.id === reportId) || reports[0];
+
+        if (!report) { document.getElementById('reportContent').innerHTML = '<div class="empty-state"><div class="empty-state-icon">😔</div><div class="empty-state-title">Laporan tidak ditemukan</div><a href="feed.html" class="btn btn-primary" style="margin-top:16px;">Kembali</a></div>'; }
+        else { renderReport(); }
+
+        function renderReport() {
+            const cat = getCategory(report.category);
+            const st = getStatus(report.status);
+
+            document.title = `${report.title} – LaporIn`;
+            document.getElementById('reportPhoto').src = report.photo;
+            document.getElementById('reportTitle').textContent = report.title;
+            document.getElementById('reportDesc').textContent = report.description;
+            document.getElementById('upvoteCount').textContent = report.upvotes.toLocaleString('id-ID');
+            document.getElementById('reportAddress').textContent = '📍 ' + (report.address || report.city);
+
+            // Badges
+            document.getElementById('reportBadges').innerHTML = `
+      <span class="badge badge-${report.status}">${st.icon} ${st.label}</span>
+      <span class="badge badge-cat">${cat.icon} ${cat.label}</span>
+      <span class="badge" style="background:#F3F4F6; color:#374151;">${report.id}</span>`;
+
+            // Meta
+            document.getElementById('reportMeta').innerHTML = `
+      <span>📍 ${report.city}</span>
+      <span>⏱️ ${timeAgo(report.createdAt)}</span>
+      <span>👍 ${report.upvotes.toLocaleString('id-ID')} dukungan</span>
+      <span>💬 ${(report.comments || []).length} komentar</span>`;
+
+            // Upvote state
+            const upvoted = (report.upvotedBy || []).includes('me');
+            if (upvoted) document.getElementById('mainUpvote').classList.add('active');
+
+            // Timeline
+            const allStatuses = ['dilaporkan', 'diverifikasi', 'diproses', 'selesai'];
+            const doneStatuses = report.timeline.map(t => t.status);
+            const currentIdx = allStatuses.indexOf(report.status);
+
+            document.getElementById('statusTimeline').innerHTML = allStatuses.map((s, i) => {
+                const timelineEntry = report.timeline.find(t => t.status === s);
+                const isDone = i < currentIdx;
+                const isActive = s === report.status;
+                const st2 = getStatus(s);
+                return `
+        <div class="timeline-item ${isDone ? 'done' : isActive ? 'active' : ''}">
+          <div class="timeline-dot">${isDone ? '✓' : isActive ? '●' : ''}</div>
+          <div>
+            <div class="timeline-title" style="color: ${isDone ? 'var(--green)' : isActive ? 'var(--red)' : 'var(--gray-400)'};">${st2.icon} ${st2.label}</div>
+            ${timelineEntry ? `<div class="timeline-note">${timelineEntry.note}</div><div class="timeline-date">${formatDate(timelineEntry.date)}</div>` : '<div class="timeline-note" style="color:var(--gray-300);">Menunggu...</div>'}
+          </div>
+        </div>`;
+            }).join('');
+
+            // Department
+            document.getElementById('deptInfo').innerHTML = report.department
+                ? `<div style="font-weight: 700; color: var(--gray-900);">${report.department}</div><div style="margin-top: 4px; font-size: 0.8rem; color: var(--gray-400);">Ditugaskan untuk menangani laporan ini</div>`
+                : `<div style="color: var(--gray-400); font-style: italic;">Belum ditetapkan. Sedang dalam proses verifikasi.</div>`;
+
+            // Reporter
+            document.getElementById('reporterInfo').innerHTML = `
+      <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--red), var(--red-dark)); display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 1rem; flex-shrink: 0;">${(report.reporter || 'A')[0]}</div>
+      <div>
+        <div style="font-weight: 700; font-size: 0.9rem;">${report.reporter || 'Anonim'}</div>
+        <div style="font-size: 0.78rem; color: var(--gray-400);">🏅 ${report.reporterBadge || 'Superhero Warga'}</div>
+      </div>`;
+
+            // Comments
+            renderComments();
+
+            // Related
+            const related = reports.filter(r => r.category === report.category && r.id !== report.id).slice(0, 3);
+            document.getElementById('relatedReports').innerHTML = related.length === 0
+                ? '<div style="color: var(--gray-400); font-size: 0.85rem;">Tidak ada laporan terkait.</div>'
+                : related.map(r => `
+          <div onclick="location.href='report.html?id=${r.id}'" style="display:flex; gap:10px; align-items:center; padding: 10px 0; border-bottom: 1px solid var(--gray-100); cursor:pointer;" onmouseover="this.opacity=0.7">
+            <img src="${r.photo}" style="width: 44px; height: 44px; border-radius: 8px; object-fit: cover; flex-shrink:0;" onerror="this.style.background='#eee';" />
+            <div>
+              <div style="font-size: 0.82rem; font-weight: 600; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${r.title}</div>
+              <div style="font-size: 0.72rem; color: var(--gray-400); margin-top: 2px;">${timeAgo(r.createdAt)}</div>
+            </div>
+          </div>`).join('');
+
+            // Map
+            setTimeout(() => {
+                const map = L.map('detailMap').setView([report.lat, report.lng], 15);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+                const cat2 = getCategory(report.category);
+                const icon = L.divIcon({
+                    html: `<div style="background:var(--red);width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:1.2rem;box-shadow:0 4px 12px rgba(0,0,0,0.3);border:3px solid white;">${cat2.icon}</div>`,
+                    className: '', iconSize: [40, 40], iconAnchor: [20, 20]
+                });
+                L.marker([report.lat, report.lng], { icon }).addTo(map).bindPopup(report.title).openPopup();
+            }, 200);
+        }
+
+        function renderComments() {
+            const comments = report.comments || [];
+            document.getElementById('commentsList').innerHTML = comments.length === 0
+                ? '<div style="color: var(--gray-400); font-size: 0.85rem; margin-bottom: 12px;">Belum ada komentar. Jadilah yang pertama!</div>'
+                : comments.map(c => `
+          <div style="padding: 12px 0; border-bottom: 1px solid var(--gray-100);">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+              <span style="font-weight: 700; font-size: 0.85rem;">${c.user}</span>
+              <span style="font-size: 0.75rem; color: var(--gray-400);">${c.time}</span>
+            </div>
+            <div style="font-size: 0.88rem; color: var(--gray-700);">${c.text}</div>
+          </div>`).join('');
+        }
+
+        function addComment() {
+            const input = document.getElementById('commentInput');
+            const text = input.value.trim();
+            if (!text) return;
+            report.comments.push({ user: 'Anda', text, time: 'Baru saja' });
+            const storedReports = loadReports();
+            const idx = storedReports.findIndex(r => r.id === report.id);
+            if (idx !== -1) storedReports[idx] = report;
+            saveReports(storedReports);
+            renderComments();
+            input.value = '';
+            showToast('Komentar ditambahkan! 💬', '');
+        }
+
+        function toggleUpvote() {
+            const storedReports = loadReports();
+            const r = storedReports.find(r => r.id === report.id);
+            if (!r.upvotedBy) r.upvotedBy = [];
+            const btn = document.getElementById('mainUpvote');
+            if (r.upvotedBy.includes('me')) {
+                r.upvotes--;
+                r.upvotedBy = r.upvotedBy.filter(u => u !== 'me');
+                btn.classList.remove('active');
+                showToast('Dukungan dibatalkan', '');
+            } else {
+                r.upvotes++;
+                r.upvotedBy.push('me');
+                btn.classList.add('active');
+                showToast('Terima kasih mendukung! 👍', 'Satu suara lebih untuk masalah ini diselesaikan.');
+            }
+            document.getElementById('upvoteCount').textContent = r.upvotes.toLocaleString('id-ID');
+            report = r;
+            saveReports(storedReports);
+        }
+
+        function showToast(title, body) {
+            document.getElementById('toastTitle').textContent = title;
+            document.getElementById('toastBody').textContent = body;
+            const t = document.getElementById('toast');
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        function shareWhatsApp() {
+            const text = encodeURIComponent(`Lihat laporan ini di LaporIn! 📢\n\n${report.title}\n📍 ${report.city}\n\nDukung agar segera ditangani: ${window.location.href}`);
+            window.open(`https://wa.me/?text=${text}`, '_blank');
+        }
+        function shareInstagram() { showToast('Salin link ini untuk Instagram Stories:', window.location.href); }
+    </script>
+</body>
+
+</html>
