@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="css/style.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="icon"
-        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📢</text></svg>" />
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'></text></svg>" />
 </head>
 
 <body>
@@ -18,7 +18,7 @@
     <!-- NAVBAR -->
     <nav class="navbar">
         <a href="index.html" class="navbar-brand">
-            <div class="logo-icon">📢</div>LaporIn
+            <div class="logo-icon"></div>LaporIn
         </a>
         <ul class="navbar-nav">
             <li><a href="feed.html">Semua Laporan</a></li>
@@ -26,7 +26,7 @@
             <li><a href="dashboard.html">Dashboard Pemerintah</a></li>
         </ul>
         <div class="navbar-actions">
-            <a href="submit.html" class="btn btn-primary">📸 Laporkan Sekarang</a>
+            <a href="submit.html" class="btn btn-primary"> Laporkan Sekarang</a>
         </div>
     </nav>
 
@@ -81,13 +81,13 @@
 
                 <!-- STEP 1: Photo -->
                 <div class="step-panel card" id="step1" style="padding: 32px;">
-                    <h2 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 20px;">📸 Step 1: Ambil atau Upload
+                    <h2 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 20px;"> Step 1: Ambil atau Upload
                         Foto</h2>
                     <div class="photo-upload" id="photoUpload" onclick="document.getElementById('photoInput').click()">
                         <input type="file" id="photoInput" accept="image/*" capture="environment"
                             onchange="previewPhoto(event)" />
                         <div id="uploadPrompt">
-                            <div class="photo-upload-icon">📷</div>
+                            <div class="photo-upload-icon"></div>
                             <div style="font-weight: 700; font-size: 1rem; margin-bottom: 6px;">Klik untuk ambil foto
                                 atau upload gambar</div>
                             <div style="font-size: 0.85rem; color: var(--gray-500);">Foto yang jelas akan mempercepat
@@ -97,7 +97,7 @@
                     </div>
                     <div
                         style="margin-top: 12px; padding: 12px 16px; background: #FEF3C7; border-radius: var(--radius-sm); font-size: 0.82rem; color: #92400E;">
-                        💡 <strong>Tips:</strong> Pastikan foto jelas dan menunjukkan masalah dengan baik. Hindari foto
+                         <strong>Tips:</strong> Pastikan foto jelas dan menunjukkan masalah dengan baik. Hindari foto
                         yang buram atau terlalu jauh.
                     </div>
                     <button type="button" class="btn btn-primary w-full" style="margin-top: 20px;"
@@ -106,7 +106,7 @@
 
                 <!-- STEP 2: Category -->
                 <div class="step-panel card" id="step2" style="padding: 32px; display: none;">
-                    <h2 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 20px;">📂 Step 2: Pilih Kategori
+                    <h2 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 20px;"> Step 2: Pilih Kategori
                         Masalah</h2>
                     <div class="category-grid" id="categoryGrid"></div>
                     <div style="display: flex; gap: 12px; margin-top: 20px;">
@@ -118,7 +118,7 @@
 
                 <!-- STEP 3: Details -->
                 <div class="step-panel card" id="step3" style="padding: 32px; display: none;">
-                    <h2 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 20px;">📝 Step 3: Ceritakan
+                    <h2 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 20px;"> Step 3: Ceritakan
                         Masalahnya</h2>
                     <div style="display: flex; flex-direction: column; gap: 20px;">
                         <div class="form-group">
@@ -150,7 +150,7 @@
 
                 <!-- STEP 4: Location -->
                 <div class="step-panel card" id="step4" style="padding: 32px; display: none;">
-                    <h2 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 20px;">📍 Step 4: Konfirmasi Lokasi
+                    <h2 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 20px;"> Step 4: Konfirmasi Lokasi
                     </h2>
                     <div style="display: flex; gap: 12px; margin-bottom: 16px; align-items: flex-start;">
                         <div class="form-group" style="flex: 1;">
@@ -159,24 +159,24 @@
                                 placeholder="Contoh: Jl. Jenderal Sudirman No. 45, Jakarta Pusat" />
                         </div>
                         <button type="button" class="btn btn-secondary" style="margin-top: 26px; white-space: nowrap;"
-                            onclick="detectLocation()">📍 Deteksi Otomatis</button>
+                            onclick="detectLocation()"> Deteksi Otomatis</button>
                     </div>
                     <div id="locationMap"
                         style="height: 280px; border-radius: var(--radius); overflow: hidden; margin-bottom: 16px; background: var(--gray-200); display: flex; align-items: center; justify-content: center;">
                         <div id="mapPlaceholder" style="text-align: center; color: var(--gray-400);">
-                            <div style="font-size: 2.5rem; margin-bottom: 8px;">🗺️</div>
+                            <div style="font-size: 2.5rem; margin-bottom: 8px;"></div>
                             <div>Klik "Deteksi Otomatis" atau ketik alamat</div>
                         </div>
                     </div>
                     <div id="locationInfo"
                         style="display: none; padding: 12px 16px; background: #D1FAE5; border-radius: var(--radius-sm); font-size: 0.85rem; color: #065F46; margin-bottom: 16px;">
-                        ✅ <span id="locationText">Lokasi terdeteksi</span>
+                         <span id="locationText">Lokasi terdeteksi</span>
                     </div>
 
                     <div style="display: flex; gap: 12px; margin-top: 20px;">
                         <button type="button" class="btn btn-ghost w-full" onclick="nextStep(3)">← Kembali</button>
                         <button type="button" class="btn btn-green w-full" onclick="submitReport()">
-                            🚀 Kirim Laporan!
+                             Kirim Laporan!
                         </button>
                     </div>
                 </div>
@@ -187,13 +187,13 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px;">
                 <div
                     style="padding: 16px; background: white; border-radius: var(--radius); border: 1px solid var(--gray-200); font-size: 0.82rem;">
-                    <div style="font-weight: 700; margin-bottom: 4px;">🔒 Privasi Anda Terjaga</div>
+                    <div style="font-weight: 700; margin-bottom: 4px;"> Privasi Anda Terjaga</div>
                     <div style="color: var(--gray-500);">Anda dapat melaporkan secara anonim. Data pribadi tidak akan
                         dipublikasikan.</div>
                 </div>
                 <div
                     style="padding: 16px; background: white; border-radius: var(--radius); border: 1px solid var(--gray-200); font-size: 0.82rem;">
-                    <div style="font-weight: 700; margin-bottom: 4px;">⚡ Respon Cepat</div>
+                    <div style="font-weight: 700; margin-bottom: 4px;"> Respon Cepat</div>
                     <div style="color: var(--gray-500);">Pemerintah daerah akan dinotifikasi dalam hitungan menit
                         setelah laporan dikirim.</div>
                 </div>
@@ -204,17 +204,17 @@
     <!-- Success Modal -->
     <div class="modal-overlay" id="successModal">
         <div class="modal-box">
-            <div class="modal-icon">🎉</div>
+            <div class="modal-icon"></div>
             <div class="modal-title">Laporan Berhasil Dikirim!</div>
             <div class="modal-body">
                 Terima kasih telah berkontribusi untuk Indonesia yang lebih baik. Laporan Anda akan kami teruskan ke
                 dinas terkait.
                 <br><br>
-                <strong>Kamu baru saja mendapatkan badge: 🌟 Superhero Warga!</strong>
+                <strong>Kamu baru saja mendapatkan badge:  Superhero Warga!</strong>
             </div>
             <div id="reportId" style="font-size: 0.85rem; color: var(--gray-500); margin-bottom: 20px;"></div>
             <div style="display: flex; gap: 12px;">
-                <button class="btn btn-ghost w-full" onclick="shareWhatsApp()">📱 Bagikan ke WhatsApp</button>
+                <button class="btn btn-ghost w-full" onclick="shareWhatsApp()"> Bagikan ke WhatsApp</button>
                 <a href="feed.html" class="btn btn-primary w-full">Lihat Semua Laporan</a>
             </div>
         </div>
@@ -282,7 +282,7 @@
             // Update step indicators
             document.querySelectorAll('.step-ind div:first-child').forEach((d, i) => {
                 const stepNum = i + 1;
-                if (stepNum < n) { d.style.background = 'var(--green)'; d.textContent = '✓'; }
+                if (stepNum < n) { d.style.background = 'var(--green)'; d.textContent = ''; }
                 else if (stepNum === n) { d.style.background = 'var(--red)'; d.textContent = stepNum; }
                 else { d.style.background = 'var(--gray-300)'; d.textContent = stepNum; }
             });
@@ -368,7 +368,7 @@
         }
 
         function shareWhatsApp() {
-            const text = encodeURIComponent(`Saya baru saja melaporkan masalah di LaporIn! 📢\n\nMasalah: ${document.getElementById('reportTitle').value}\n\nBantu upvote dan pantau progressnya di: ${window.location.origin}/laporan/feed.html\n\nBersama kita bisa! 🇮🇩`);
+            const text = encodeURIComponent(`Saya baru saja melaporkan masalah di LaporIn! \n\nMasalah: ${document.getElementById('reportTitle').value}\n\nBantu upvote dan pantau progressnya di: ${window.location.origin}/laporan/feed.html\n\nBersama kita bisa! `);
             window.open(`https://wa.me/?text=${text}`, '_blank');
         }
     </script>

@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="css/style.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="icon"
-        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📢</text></svg>" />
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'></text></svg>" />
 </head>
 
 <body>
@@ -16,7 +16,7 @@
     <!-- NAVBAR -->
     <nav class="navbar">
         <a href="index.html" class="navbar-brand">
-            <div class="logo-icon">📢</div>LaporIn
+            <div class="logo-icon"></div>LaporIn
         </a>
         <ul class="navbar-nav">
             <li><a href="feed.html">Semua Laporan</a></li>
@@ -24,7 +24,7 @@
             <li><a href="dashboard.html">Dashboard Pemerintah</a></li>
         </ul>
         <div class="navbar-actions">
-            <a href="submit.html" class="btn btn-primary">📸 Laporkan Sekarang</a>
+            <a href="submit.html" class="btn btn-primary"> Laporkan Sekarang</a>
         </div>
     </nav>
 
@@ -60,18 +60,18 @@
                         <div style="display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap;">
                             <button class="upvote-btn" id="mainUpvote" onclick="toggleUpvote()"
                                 style="padding: 10px 20px; font-size: 0.95rem;">
-                                <span class="icon">👍</span> Dukung Laporan ini <span id="upvoteCount"
+                                <span class="icon"></span> Dukung Laporan ini <span id="upvoteCount"
                                     style="font-weight: 800;"></span>
                             </button>
-                            <button class="btn btn-secondary" onclick="shareWhatsApp()">📱 Bagikan ke WhatsApp</button>
-                            <button class="btn btn-ghost" onclick="shareInstagram()">📸 Bagikan ke Instagram</button>
+                            <button class="btn btn-secondary" onclick="shareWhatsApp()"> Bagikan ke WhatsApp</button>
+                            <button class="btn btn-ghost" onclick="shareInstagram()"> Bagikan ke Instagram</button>
                         </div>
                     </div>
 
                     <!-- Map -->
                     <div class="card mb-6" style="overflow: hidden;">
                         <div style="padding: 16px 20px; border-bottom: 1px solid var(--gray-200);">
-                            <strong>📍 Lokasi Kejadian</strong>
+                            <strong> Lokasi Kejadian</strong>
                         </div>
                         <div id="detailMap" style="height: 280px;"></div>
                         <div style="padding: 12px 20px; background: var(--gray-50); font-size: 0.85rem; color: var(--gray-600);"
@@ -80,7 +80,7 @@
 
                     <!-- Comments -->
                     <div class="card" style="padding: 24px;">
-                        <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 20px;">💬 Komentar Warga</h3>
+                        <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 20px;"> Komentar Warga</h3>
                         <div id="commentsList"></div>
                         <div style="margin-top: 16px; display: flex; gap: 12px;">
                             <input type="text" class="form-control" id="commentInput"
@@ -94,25 +94,25 @@
                 <div>
                     <!-- Status Timeline -->
                     <div class="card mb-6" style="padding: 24px;">
-                        <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 20px;">📊 Status & Progres</h3>
+                        <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 20px;"> Status & Progres</h3>
                         <div class="timeline" id="statusTimeline"></div>
                     </div>
 
                     <!-- Department info -->
                     <div class="card mb-6" style="padding: 20px;" id="deptCard">
-                        <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 12px;">🏛️ Dinas Penanganan</h4>
+                        <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 12px;"> Dinas Penanganan</h4>
                         <div id="deptInfo" style="font-size: 0.88rem; color: var(--gray-600);"></div>
                     </div>
 
                     <!-- Reporter info -->
                     <div class="card mb-6" style="padding: 20px;">
-                        <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 12px;">👤 Dilaporkan Oleh</h4>
+                        <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 12px;"> Dilaporkan Oleh</h4>
                         <div style="display: flex; align-items: center; gap: 12px;" id="reporterInfo"></div>
                     </div>
 
                     <!-- Related reports -->
                     <div class="card" style="padding: 20px;">
-                        <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 12px;">📋 Laporan Terkait</h4>
+                        <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 12px;"> Laporan Terkait</h4>
                         <div id="relatedReports"></div>
                     </div>
                 </div>
@@ -122,7 +122,7 @@
 
     <!-- Toast -->
     <div class="toast" id="toast" style="border-left-color: var(--red);">
-        <div class="toast-icon">👍</div>
+        <div class="toast-icon"></div>
         <div>
             <div class="toast-title" id="toastTitle"></div>
             <div class="toast-body" id="toastBody"></div>
@@ -138,7 +138,7 @@
         let reports = loadReports();
         let report = reports.find(r => r.id === reportId) || reports[0];
 
-        if (!report) { document.getElementById('reportContent').innerHTML = '<div class="empty-state"><div class="empty-state-icon">😔</div><div class="empty-state-title">Laporan tidak ditemukan</div><a href="feed.html" class="btn btn-primary" style="margin-top:16px;">Kembali</a></div>'; }
+        if (!report) { document.getElementById('reportContent').innerHTML = '<div class="empty-state"><div class="empty-state-icon"></div><div class="empty-state-title">Laporan tidak ditemukan</div><a href="feed.html" class="btn btn-primary" style="margin-top:16px;">Kembali</a></div>'; }
         else { renderReport(); }
 
         function renderReport() {
@@ -150,7 +150,7 @@
             document.getElementById('reportTitle').textContent = report.title;
             document.getElementById('reportDesc').textContent = report.description;
             document.getElementById('upvoteCount').textContent = report.upvotes.toLocaleString('id-ID');
-            document.getElementById('reportAddress').textContent = '📍 ' + (report.address || report.city);
+            document.getElementById('reportAddress').textContent = ' ' + (report.address || report.city);
 
             // Badges
             document.getElementById('reportBadges').innerHTML = `
@@ -160,10 +160,10 @@
 
             // Meta
             document.getElementById('reportMeta').innerHTML = `
-      <span>📍 ${report.city}</span>
-      <span>⏱️ ${timeAgo(report.createdAt)}</span>
-      <span>👍 ${report.upvotes.toLocaleString('id-ID')} dukungan</span>
-      <span>💬 ${(report.comments || []).length} komentar</span>`;
+      <span> ${report.city}</span>
+      <span> ${timeAgo(report.createdAt)}</span>
+      <span> ${report.upvotes.toLocaleString('id-ID')} dukungan</span>
+      <span> ${(report.comments || []).length} komentar</span>`;
 
             // Upvote state
             const upvoted = (report.upvotedBy || []).includes('me');
@@ -181,7 +181,7 @@
                 const st2 = getStatus(s);
                 return `
         <div class="timeline-item ${isDone ? 'done' : isActive ? 'active' : ''}">
-          <div class="timeline-dot">${isDone ? '✓' : isActive ? '●' : ''}</div>
+          <div class="timeline-dot">${isDone ? '' : isActive ? '●' : ''}</div>
           <div>
             <div class="timeline-title" style="color: ${isDone ? 'var(--green)' : isActive ? 'var(--red)' : 'var(--gray-400)'};">${st2.icon} ${st2.label}</div>
             ${timelineEntry ? `<div class="timeline-note">${timelineEntry.note}</div><div class="timeline-date">${formatDate(timelineEntry.date)}</div>` : '<div class="timeline-note" style="color:var(--gray-300);">Menunggu...</div>'}
@@ -199,7 +199,7 @@
       <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--red), var(--red-dark)); display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 1rem; flex-shrink: 0;">${(report.reporter || 'A')[0]}</div>
       <div>
         <div style="font-weight: 700; font-size: 0.9rem;">${report.reporter || 'Anonim'}</div>
-        <div style="font-size: 0.78rem; color: var(--gray-400);">🏅 ${report.reporterBadge || 'Superhero Warga'}</div>
+        <div style="font-size: 0.78rem; color: var(--gray-400);"> ${report.reporterBadge || 'Superhero Warga'}</div>
       </div>`;
 
             // Comments
@@ -256,7 +256,7 @@
             saveReports(storedReports);
             renderComments();
             input.value = '';
-            showToast('Komentar ditambahkan! 💬', '');
+            showToast('Komentar ditambahkan! ', '');
         }
 
         function toggleUpvote() {
@@ -273,7 +273,7 @@
                 r.upvotes++;
                 r.upvotedBy.push('me');
                 btn.classList.add('active');
-                showToast('Terima kasih mendukung! 👍', 'Satu suara lebih untuk masalah ini diselesaikan.');
+                showToast('Terima kasih mendukung! ', 'Satu suara lebih untuk masalah ini diselesaikan.');
             }
             document.getElementById('upvoteCount').textContent = r.upvotes.toLocaleString('id-ID');
             report = r;
@@ -289,7 +289,7 @@
         }
 
         function shareWhatsApp() {
-            const text = encodeURIComponent(`Lihat laporan ini di LaporIn! 📢\n\n${report.title}\n📍 ${report.city}\n\nDukung agar segera ditangani: ${window.location.href}`);
+            const text = encodeURIComponent(`Lihat laporan ini di LaporIn! \n\n${report.title}\n ${report.city}\n\nDukung agar segera ditangani: ${window.location.href}`);
             window.open(`https://wa.me/?text=${text}`, '_blank');
         }
         function shareInstagram() { showToast('Salin link ini untuk Instagram Stories:', window.location.href); }
