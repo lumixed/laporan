@@ -97,7 +97,7 @@
                     </div>
                     <div
                         style="margin-top: 12px; padding: 12px 16px; background: #FEF3C7; border-radius: var(--radius-sm); font-size: 0.82rem; color: #92400E;">
-                         <strong>Tips:</strong> Pastikan foto jelas dan menunjukkan masalah dengan baik. Hindari foto
+                        <strong>Tips:</strong> Pastikan foto jelas dan menunjukkan masalah dengan baik. Hindari foto
                         yang buram atau terlalu jauh.
                     </div>
                     <button type="button" class="btn btn-primary w-full" style="margin-top: 20px;"
@@ -170,13 +170,13 @@
                     </div>
                     <div id="locationInfo"
                         style="display: none; padding: 12px 16px; background: #D1FAE5; border-radius: var(--radius-sm); font-size: 0.85rem; color: #065F46; margin-bottom: 16px;">
-                         <span id="locationText">Lokasi terdeteksi</span>
+                        <span id="locationText">Lokasi terdeteksi</span>
                     </div>
 
                     <div style="display: flex; gap: 12px; margin-top: 20px;">
                         <button type="button" class="btn btn-ghost w-full" onclick="nextStep(3)">← Kembali</button>
                         <button type="button" class="btn btn-green w-full" onclick="submitReport()">
-                             Kirim Laporan!
+                            Kirim Laporan!
                         </button>
                     </div>
                 </div>
@@ -210,7 +210,7 @@
                 Terima kasih telah berkontribusi untuk Indonesia yang lebih baik. Laporan Anda akan kami teruskan ke
                 dinas terkait.
                 <br><br>
-                <strong>Kamu baru saja mendapatkan badge:  Superhero Warga!</strong>
+                <strong>Kamu baru saja mendapatkan badge: Superhero Warga!</strong>
             </div>
             <div id="reportId" style="font-size: 0.85rem; color: var(--gray-500); margin-bottom: 20px;"></div>
             <div style="display: flex; gap: 12px;">
@@ -223,7 +223,6 @@
     <script src="js/data.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        initData();
         let currentStep = 1;
         let selectedCategory = null;
         let reportLat = -6.2088, reportLng = 106.8456;
@@ -233,7 +232,7 @@
         const catGrid = document.getElementById('categoryGrid');
         catGrid.innerHTML = CATEGORIES.map(c => `
     <div class="category-item" onclick="selectCategory('${c.id}', this)" id="cat-${c.id}">
-      <div class="cat-icon">${c.icon}</div>
+      <div class="cat-icon" style="font-size:2rem; margin-bottom:8px;">${c.label[0]}</div>
       <div class="cat-label">${c.label}</div>
     </div>`).join('');
 
@@ -262,27 +261,21 @@
         }
 
         function nextStep(n) {
-            // Validate current
             if (currentStep === 3) {
                 const title = document.getElementById('reportTitle').value.trim();
                 const desc = document.getElementById('reportDesc').value.trim();
-                if (!title || !desc) {
-                    alert('Harap isi judul dan deskripsi laporan!');
-                    return;
-                }
+                if (!title || !desc) { alert('Harap isi judul dan deskripsi laporan!'); return; }
             }
             document.getElementById('step' + currentStep).style.display = 'none';
             document.getElementById('step' + n).style.display = 'block';
             currentStep = n;
 
-            // Update progress bar
             const progress = ((n - 1) / 3) * 100;
             document.getElementById('progressBar').style.width = progress + '%';
 
-            // Update step indicators
             document.querySelectorAll('.step-ind div:first-child').forEach((d, i) => {
                 const stepNum = i + 1;
-                if (stepNum < n) { d.style.background = 'var(--green)'; d.textContent = ''; }
+                if (stepNum < n) { d.style.background = 'var(--green)'; d.textContent = '✓'; }
                 else if (stepNum === n) { d.style.background = 'var(--red)'; d.textContent = stepNum; }
                 else { d.style.background = 'var(--gray-300)'; d.textContent = stepNum; }
             });
@@ -308,10 +301,7 @@
         }
 
         function detectLocation() {
-            if (!navigator.geolocation) {
-                alert('Geolokasi tidak didukung browser ini.');
-                return;
-            }
+            if (!navigator.geolocation) { alert('Geolokasi tidak didukung browser ini.'); return; }
             navigator.geolocation.getCurrentPosition(pos => {
                 reportLat = pos.coords.latitude; reportLng = pos.coords.longitude;
                 if (locationMap) {
@@ -323,55 +313,199 @@
                 document.getElementById('locationText').textContent = `Lokasi berhasil dideteksi (${reportLat.toFixed(4)}, ${reportLng.toFixed(4)})`;
                 document.getElementById('reportAddress').value = `Lat: ${reportLat.toFixed(4)}, Lng: ${reportLng.toFixed(4)}`;
             }, () => {
-                // Fallback to Jakarta
                 document.getElementById('locationInfo').style.display = 'block';
                 document.getElementById('locationText').textContent = 'Menggunakan lokasi demo: Jakarta Pusat';
             });
         }
 
-        function submitReport() {
+        async function submitReport() {
             const title = document.getElementById('reportTitle').value.trim();
             const desc = document.getElementById('reportDesc').value.trim();
             if (!title || !desc) { nextStep(3); return; }
             if (!selectedCategory) { nextStep(2); return; }
 
-            const newId = 'RPT-' + String(Math.floor(Math.random() * 9000) + 1000);
-            const newReport = {
-                id: newId,
-                title,
-                description: desc,
-                category: selectedCategory,
-                status: 'dilaporkan',
-                city: 'Jakarta',
-                district: 'Jakarta Pusat',
-                address: document.getElementById('reportAddress').value || 'Lokasi tidak ditentukan',
-                lat: reportLat, lng: reportLng,
-                upvotes: 1,
-                upvotedBy: ['me'],
-                reporter: document.getElementById('reporterName').value || 'Anonim',
-                reporterBadge: 'Superhero Warga',
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                department: null,
-                photo: 'https://images.unsplash.com/photo-1515162305285-0293e4767cc2?w=600&q=80',
-                comments: [],
-                timeline: [{ status: 'dilaporkan', date: new Date().toISOString(), note: 'Laporan diterima oleh sistem LaporIn' }],
-            };
+            const submitBtn = document.querySelector('#step4 .btn-green');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Mengirim...';
 
-            const reports = loadReports();
-            reports.unshift(newReport);
-            saveReports(reports);
+            try {
+                const formData = new FormData();
+                formData.append('title', title);
+                formData.append('description', desc);
+                formData.append('category', selectedCategory);
+                formData.append('city', 'Jakarta');
+                formData.append('address', document.getElementById('reportAddress').value || 'Lokasi tidak ditentukan');
+                formData.append('lat', reportLat);
+                formData.append('lng', reportLng);
+                formData.append('reporter', document.getElementById('reporterName').value || 'Anonim');
 
-            document.getElementById('reportId').textContent = `ID Laporan: ${newId}`;
-            document.getElementById('successModal').classList.add('open');
-            document.getElementById('progressBar').style.width = '100%';
+                const photoFile = document.getElementById('photoInput').files[0];
+                if (photoFile) {
+                    formData.append('photo', photoFile);
+                }
+
+                const newReport = await apiSubmitReport(formData);
+                document.getElementById('reportId').textContent = `ID Laporan: ${newReport.id}`;
+                document.getElementById('successModal').classList.add('open');
+                document.getElementById('progressBar').style.width = '100%';
+            } catch (err) {
+                alert('Gagal mengirim laporan: ' + err.message + '\n\nPastikan server backend berjalan di port 3001.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Kirim Laporan!';
+            }
         }
 
         function shareWhatsApp() {
-            const text = encodeURIComponent(`Saya baru saja melaporkan masalah di LaporIn! \n\nMasalah: ${document.getElementById('reportTitle').value}\n\nBantu upvote dan pantau progressnya di: ${window.location.origin}/laporan/feed.html\n\nBersama kita bisa! `);
+            const text = encodeURIComponent(`Saya baru saja melaporkan masalah di LaporIn!\n\nMasalah: ${document.getElementById('reportTitle').value}\n\nBantu upvote dan pantau progressnya di: ${window.location.origin}/feed.html\n\nBersama kita bisa!`);
             window.open(`https://wa.me/?text=${text}`, '_blank');
         }
     </script>
 </body>
 
 </html>
+
+let currentStep = 1;
+let selectedCategory = null;
+let reportLat = -6.2088, reportLng = 106.8456;
+let locationMap = null;
+
+// Build category grid
+const catGrid = document.getElementById('categoryGrid');
+catGrid.innerHTML = CATEGORIES.map(c => `
+<div class="category-item" onclick="selectCategory('${c.id}', this)" id="cat-${c.id}">
+    <div class="cat-icon">${c.icon}</div>
+    <div class="cat-label">${c.label}</div>
+</div>`).join('');
+
+function selectCategory(id, el) {
+document.querySelectorAll('.category-item').forEach(e => e.classList.remove('selected'));
+el.classList.add('selected');
+selectedCategory = id;
+document.getElementById('step2Next').disabled = false;
+}
+
+function updateCharCount(el, countId, max) {
+document.getElementById(countId).textContent = el.value.length;
+}
+
+function previewPhoto(e) {
+const file = e.target.files[0];
+if (!file) return;
+const reader = new FileReader();
+reader.onload = ev => {
+const preview = document.getElementById('photoPreview');
+preview.src = ev.target.result;
+preview.style.display = 'block';
+document.getElementById('uploadPrompt').style.display = 'none';
+};
+reader.readAsDataURL(file);
+}
+
+function nextStep(n) {
+// Validate current
+if (currentStep === 3) {
+const title = document.getElementById('reportTitle').value.trim();
+const desc = document.getElementById('reportDesc').value.trim();
+if (!title || !desc) {
+alert('Harap isi judul dan deskripsi laporan!');
+return;
+}
+}
+document.getElementById('step' + currentStep).style.display = 'none';
+document.getElementById('step' + n).style.display = 'block';
+currentStep = n;
+
+// Update progress bar
+const progress = ((n - 1) / 3) * 100;
+document.getElementById('progressBar').style.width = progress + '%';
+
+// Update step indicators
+document.querySelectorAll('.step-ind div:first-child').forEach((d, i) => {
+const stepNum = i + 1;
+if (stepNum < n) { d.style.background='var(--green)' ; d.textContent='' ; } else if (stepNum===n) {
+    d.style.background='var(--red)' ; d.textContent=stepNum; } else { d.style.background='var(--gray-300)' ;
+    d.textContent=stepNum; } }); if (n===4) initMap(); window.scrollTo({ top: 0, behavior: 'smooth' }); } function
+    initMap() { if (locationMap) return; const container=document.getElementById('locationMap'); container.innerHTML=''
+    ; locationMap=L.map('locationMap').setView([reportLat, reportLng], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap'
+    }).addTo(locationMap); L.marker([reportLat, reportLng]).addTo(locationMap).bindPopup('Lokasi laporan
+    Anda').openPopup(); locationMap.on('click', e=> {
+    reportLat = e.latlng.lat; reportLng = e.latlng.lng;
+    locationMap.eachLayer(l => { if (l instanceof L.Marker) locationMap.removeLayer(l); });
+    L.marker([reportLat, reportLng]).addTo(locationMap);
+    document.getElementById('locationInfo').style.display = 'block';
+    document.getElementById('locationText').textContent = `Lat: ${reportLat.toFixed(4)}, Lng: ${reportLng.toFixed(4)}`;
+    });
+    }
+
+    function detectLocation() {
+    if (!navigator.geolocation) {
+    alert('Geolokasi tidak didukung browser ini.');
+    return;
+    }
+    navigator.geolocation.getCurrentPosition(pos => {
+    reportLat = pos.coords.latitude; reportLng = pos.coords.longitude;
+    if (locationMap) {
+    locationMap.setView([reportLat, reportLng], 15);
+    locationMap.eachLayer(l => { if (l instanceof L.Marker) locationMap.removeLayer(l); });
+    L.marker([reportLat, reportLng]).addTo(locationMap).bindPopup('Lokasi Anda').openPopup();
+    } else initMap();
+    document.getElementById('locationInfo').style.display = 'block';
+    document.getElementById('locationText').textContent = `Lokasi berhasil dideteksi (${reportLat.toFixed(4)},
+    ${reportLng.toFixed(4)})`;
+    document.getElementById('reportAddress').value = `Lat: ${reportLat.toFixed(4)}, Lng: ${reportLng.toFixed(4)}`;
+    }, () => {
+    // Fallback to Jakarta
+    document.getElementById('locationInfo').style.display = 'block';
+    document.getElementById('locationText').textContent = 'Menggunakan lokasi demo: Jakarta Pusat';
+    });
+    }
+
+    function submitReport() {
+    const title = document.getElementById('reportTitle').value.trim();
+    const desc = document.getElementById('reportDesc').value.trim();
+    if (!title || !desc) { nextStep(3); return; }
+    if (!selectedCategory) { nextStep(2); return; }
+
+    const newId = 'RPT-' + String(Math.floor(Math.random() * 9000) + 1000);
+    const newReport = {
+    id: newId,
+    title,
+    description: desc,
+    category: selectedCategory,
+    status: 'dilaporkan',
+    city: 'Jakarta',
+    district: 'Jakarta Pusat',
+    address: document.getElementById('reportAddress').value || 'Lokasi tidak ditentukan',
+    lat: reportLat, lng: reportLng,
+    upvotes: 1,
+    upvotedBy: ['me'],
+    reporter: document.getElementById('reporterName').value || 'Anonim',
+    reporterBadge: 'Superhero Warga',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    department: null,
+    photo: 'https://images.unsplash.com/photo-1515162305285-0293e4767cc2?w=600&q=80',
+    comments: [],
+    timeline: [{ status: 'dilaporkan', date: new Date().toISOString(), note: 'Laporan diterima oleh sistem LaporIn' }],
+    };
+
+    const reports = loadReports();
+    reports.unshift(newReport);
+    saveReports(reports);
+
+    document.getElementById('reportId').textContent = `ID Laporan: ${newId}`;
+    document.getElementById('successModal').classList.add('open');
+    document.getElementById('progressBar').style.width = '100%';
+    }
+
+    function shareWhatsApp() {
+    const text = encodeURIComponent(`Saya baru saja melaporkan masalah di LaporIn! \n\nMasalah:
+    ${document.getElementById('reportTitle').value}\n\nBantu upvote dan pantau progressnya di:
+    ${window.location.origin}/laporan/feed.html\n\nBersama kita bisa! `);
+    window.open(`https://wa.me/?text=${text}`, '_blank');
+    }
+    </script>
+    </body>
+
+    </html>

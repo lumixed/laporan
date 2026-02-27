@@ -300,8 +300,8 @@
     <script src="js/data.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        initData();
         let selectedReportId = null;
+        let allReports = [];
         let dashMap = null;
 
         // Populate dept select
@@ -310,7 +310,7 @@
 
         // Populate category filter in table view
         const dashCatFilter = document.getElementById('dashCatFilter');
-        CATEGORIES.forEach(c => { const o = document.createElement('option'); o.value = c.id; o.textContent = `${c.icon} ${c.label}`; dashCatFilter.appendChild(o); });
+        CATEGORIES.forEach(c => { const o = document.createElement('option'); o.value = c.id; o.textContent = c.label; dashCatFilter.appendChild(o); });
 
         // Last updated
         document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
@@ -327,13 +327,13 @@
         }
 
         function renderOverview() {
-            const reports = loadReports();
+            const reports = allReports;
             const total = reports.length;
             const pending = reports.filter(r => r.status === 'dilaporkan').length;
             const inProgress = reports.filter(r => r.status === 'diproses').length;
             const resolved = reports.filter(r => r.status === 'selesai').length;
             const totalUpvotes = reports.reduce((s, r) => s + r.upvotes, 0);
-            const rate = Math.round((resolved / total) * 100);
+            const rate = total > 0 ? Math.round((resolved / total) * 100) : 0;
 
             document.getElementById('dTotal').textContent = total;
             document.getElementById('dPending').textContent = pending;
@@ -343,7 +343,6 @@
             document.getElementById('dResolutionRate').textContent = rate + '%';
             document.getElementById('notifBadge').textContent = pending + inProgress;
 
-            // Urgent list
             const urgent = reports.filter(r => r.status !== 'selesai').sort((a, b) => b.upvotes - a.upvotes).slice(0, 4);
             document.getElementById('urgentList').innerHTML = urgent.map(r => {
                 const cat = getCategory(r.category);
@@ -353,13 +352,12 @@
           <img src="${r.photo}" style="width: 44px; height: 44px; border-radius: 8px; object-fit: cover; flex-shrink: 0;" onerror="this.style.background='#eee';this.removeAttribute('src');" />
           <div style="flex: 1; min-width: 0;">
             <div style="font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${r.title}</div>
-            <div style="font-size: 0.75rem; color: var(--gray-400);">${cat.icon} ${r.city} ·  ${r.upvotes}</div>
+            <div style="font-size: 0.75rem; color: var(--gray-400);">${cat.label} · ${r.city} · ${r.upvotes} dukungan</div>
           </div>
           <span class="badge badge-${r.status}" style="flex-shrink: 0;">${st.label}</span>
         </div>`;
             }).join('');
 
-            // Category breakdown
             const catCounts = {};
             reports.forEach(r => { catCounts[r.category] = (catCounts[r.category] || 0) + 1; });
             const sorted = Object.entries(catCounts).sort((a, b) => b[1] - a[1]);
@@ -369,7 +367,7 @@
                 return `
         <div style="margin-bottom: 14px;">
           <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px;">
-            <span>${cat.icon} ${cat.label}</span>
+            <span>${cat.label}</span>
             <span style="color: var(--gray-500);">${count} (${pct}%)</span>
           </div>
           <div style="background: var(--gray-200); border-radius: 100px; height: 8px; overflow: hidden;">
@@ -382,7 +380,7 @@
         function renderTable() {
             const statusFilter = document.getElementById('dashStatusFilter').value;
             const catFilter = document.getElementById('dashCatFilter').value;
-            let reports = loadReports();
+            let reports = [...allReports];
             if (statusFilter !== 'all') reports = reports.filter(r => r.status === statusFilter);
             if (catFilter !== 'all') reports = reports.filter(r => r.category === catFilter);
 
@@ -400,10 +398,10 @@
               </div>
             </div>
           </td>
-          <td><span class="badge badge-cat">${cat.icon} ${cat.label}</span></td>
-          <td style="font-size: 0.85rem;"> ${r.city}</td>
-          <td style="font-weight: 700; color: var(--red);"> ${r.upvotes}</td>
-          <td><span class="badge badge-${r.status}">${st.icon} ${st.label}</span></td>
+          <td><span class="badge badge-cat">${cat.label}</span></td>
+          <td style="font-size: 0.85rem;">${r.city}</td>
+          <td style="font-weight: 700; color: var(--red);">${r.upvotes}</td>
+          <td><span class="badge badge-${r.status}">${st.label}</span></td>
           <td style="font-size: 0.8rem; color: var(--gray-500);">${formatDate(r.createdAt)}</td>
           <td>
             <div style="display: flex; gap: 6px;">
@@ -417,8 +415,7 @@
 
         function openUpdateModal(id) {
             selectedReportId = id;
-            const reports = loadReports();
-            const r = reports.find(r => r.id === id);
+            const r = allReports.find(r => r.id === id);
             document.getElementById('modalReportTitle').textContent = r.title;
             document.getElementById('modalReportId').textContent = r.id + ' · ' + r.city;
             document.getElementById('newStatusSelect').value = r.status;
@@ -428,70 +425,73 @@
         }
         function closeModal() { document.getElementById('statusModal').classList.remove('open'); }
 
-        function saveStatus() {
-            const reports = loadReports();
-            const r = reports.find(r => r.id === selectedReportId);
+        async function saveStatus() {
             const newStatus = document.getElementById('newStatusSelect').value;
             const dept = document.getElementById('deptSelect').value;
             const note = document.getElementById('updateNote').value || 'Status diperbarui oleh admin';
-            r.status = newStatus;
-            r.department = dept || r.department;
-            r.updatedAt = new Date().toISOString();
-            if (!r.timeline) r.timeline = [];
-            r.timeline.push({ status: newStatus, date: new Date().toISOString(), note });
-            saveReports(reports);
-            closeModal();
-            renderOverview();
-            renderTable();
-            showToast('Status berhasil diperbarui! ', `${r.title} → ${getStatus(newStatus).label}`);
+            const btn = document.querySelector('#statusModal .btn-primary');
+            btn.disabled = true;
+            btn.textContent = 'Menyimpan...';
+            try {
+                const updated = await apiUpdateStatus(selectedReportId, newStatus, dept, note);
+                // Update local cache
+                const idx = allReports.findIndex(r => r.id === selectedReportId);
+                if (idx !== -1) allReports[idx] = updated;
+                closeModal();
+                renderOverview();
+                renderTable();
+                showToast('Status berhasil diperbarui!', `${updated.title} → ${getStatus(newStatus).label}`);
+            } catch {
+                showToast('Gagal menyimpan', 'Coba lagi.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Simpan Update';
+            }
         }
 
         function initDashMap() {
             if (dashMap) return;
             dashMap = L.map('dashMap').setView([-2.5, 118], 5);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(dashMap);
-            const reports = loadReports();
             const colors = { dilaporkan: '#E63946', diverifikasi: '#F59E0B', diproses: '#3B82F6', selesai: '#2DC653' };
-            reports.forEach(r => {
+            allReports.forEach(r => {
+                if (!r.lat || !r.lng) return;
                 const cat = getCategory(r.category);
                 const icon = L.divIcon({
-                    html: `<div style="background:${colors[r.status] || '#E63946'};width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:1rem;box-shadow:0 4px 12px rgba(0,0,0,0.3);border:3px solid white;">${cat.icon}</div>`,
+                    html: `<div style="background:${colors[r.status] || '#E63946'};width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:0.75rem;font-weight:700;box-shadow:0 4px 12px rgba(0,0,0,0.3);border:3px solid white;">${cat.label[0]}</div>`,
                     className: '', iconSize: [36, 36], iconAnchor: [18, 18]
                 });
                 L.marker([r.lat, r.lng], { icon }).addTo(dashMap)
-                    .bindPopup(`<strong>${r.title}</strong><br> ${r.upvotes} · ${getStatus(r.status).label}<br><a href="report.html?id=${r.id}">Lihat Detail →</a>`);
+                    .bindPopup(`<strong>${r.title}</strong><br>${r.upvotes} dukungan · ${getStatus(r.status).label}<br><a href="report.html?id=${r.id}">Lihat Detail</a>`);
             });
         }
 
         function renderAnalytics() {
-            const reports = loadReports();
-            // City stats
+            const reports = allReports;
             const cities = {};
             reports.forEach(r => { cities[r.city] = (cities[r.city] || 0) + 1; });
             document.getElementById('cityStats').innerHTML = Object.entries(cities).sort((a, b) => b[1] - a[1]).map(([city, count]) => `
       <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--gray-100);">
-        <span style="font-weight: 600;"> ${city}</span>
+        <span style="font-weight: 600;">${city}</span>
         <span style="font-weight: 800; color: var(--red);">${count} laporan</span>
       </div>`).join('');
 
-            // Category stats
             const cats = {};
             reports.forEach(r => { cats[r.category] = (cats[r.category] || 0) + 1; });
             document.getElementById('catStats').innerHTML = Object.entries(cats).sort((a, b) => b[1] - a[1]).map(([id, count]) => {
                 const cat = getCategory(id);
                 return `<div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--gray-100);">
-        <span style="font-weight: 600;">${cat.icon} ${cat.label}</span>
+        <span style="font-weight: 600;">${cat.label}</span>
         <span style="font-weight: 800; color: var(--red);">${count}</span>
       </div>`;
             }).join('');
 
-            // Leaderboard
             document.getElementById('wargaStats').innerHTML = LEADERBOARD.map((u, i) => `
       <div style="display: flex; align-items: center; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--gray-100);">
-        <span style="font-size: 1.5rem;">${['1', '2', '3', '4', '5'][i]}</span>
+        <span style="font-size: 1.5rem; font-weight: 800; width: 32px; text-align: center;">${i + 1}</span>
         <div style="flex: 1;">
           <div style="font-weight: 700;">${u.name}</div>
-          <div style="font-size: 0.8rem; color: var(--gray-400);"> ${u.city} · ${u.badge}</div>
+          <div style="font-size: 0.8rem; color: var(--gray-400);">${u.city} · ${u.badge}</div>
         </div>
         <div style="text-align: right;">
           <div style="font-weight: 800; color: var(--red);">${u.reports} laporan</div>
@@ -508,9 +508,247 @@
             setTimeout(() => t.classList.remove('show'), 3500);
         }
 
-        // Initial render
-        renderOverview();
+        // Load data from API
+        apiLoadReports().then(reports => {
+            allReports = reports;
+            renderOverview();
+        }).catch(() => {
+            document.getElementById('dTotal').textContent = 'ERR';
+            showToast('Gagal memuat data', 'Pastikan server berjalan di port 3001.');
+        });
     </script>
+</body>
+
+</html>
+
+
+// Populate dept select
+const deptSel = document.getElementById('deptSelect');
+DEPARTMENTS.forEach(d => { const o = document.createElement('option'); o.value = d; o.textContent = d;
+deptSel.appendChild(o); });
+
+// Populate category filter in table view
+const dashCatFilter = document.getElementById('dashCatFilter');
+CATEGORIES.forEach(c => { const o = document.createElement('option'); o.value = c.id; o.textContent = `${c.icon}
+${c.label}`; dashCatFilter.appendChild(o); });
+
+// Last updated
+document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute:
+'2-digit' });
+
+function showView(view) {
+['overview', 'reports', 'map', 'analytics'].forEach(v => {
+document.getElementById('view' + v.charAt(0).toUpperCase() + v.slice(1)).style.display = v === view ? 'block' : 'none';
+});
+document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+event.currentTarget.classList.add('active');
+if (view === 'reports') renderTable();
+if (view === 'map') initDashMap();
+if (view === 'analytics') renderAnalytics();
+}
+
+function renderOverview() {
+const reports = loadReports();
+const total = reports.length;
+const pending = reports.filter(r => r.status === 'dilaporkan').length;
+const inProgress = reports.filter(r => r.status === 'diproses').length;
+const resolved = reports.filter(r => r.status === 'selesai').length;
+const totalUpvotes = reports.reduce((s, r) => s + r.upvotes, 0);
+const rate = Math.round((resolved / total) * 100);
+
+document.getElementById('dTotal').textContent = total;
+document.getElementById('dPending').textContent = pending;
+document.getElementById('dInProgress').textContent = inProgress;
+document.getElementById('dResolved').textContent = resolved;
+document.getElementById('dTopUpvotes').textContent = totalUpvotes.toLocaleString('id-ID');
+document.getElementById('dResolutionRate').textContent = rate + '%';
+document.getElementById('notifBadge').textContent = pending + inProgress;
+
+// Urgent list
+const urgent = reports.filter(r => r.status !== 'selesai').sort((a, b) => b.upvotes - a.upvotes).slice(0, 4);
+document.getElementById('urgentList').innerHTML = urgent.map(r => {
+const cat = getCategory(r.category);
+const st = getStatus(r.status);
+return `
+<div style="display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--gray-100); cursor: pointer;"
+    onclick="location.href='report.html?id=${r.id}'">
+    <img src="${r.photo}" style="width: 44px; height: 44px; border-radius: 8px; object-fit: cover; flex-shrink: 0;"
+        onerror="this.style.background='#eee';this.removeAttribute('src');" />
+    <div style="flex: 1; min-width: 0;">
+        <div
+            style="font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            ${r.title}</div>
+        <div style="font-size: 0.75rem; color: var(--gray-400);">${cat.icon} ${r.city} · ${r.upvotes}</div>
+    </div>
+    <span class="badge badge-${r.status}" style="flex-shrink: 0;">${st.label}</span>
+</div>`;
+}).join('');
+
+// Category breakdown
+const catCounts = {};
+reports.forEach(r => { catCounts[r.category] = (catCounts[r.category] || 0) + 1; });
+const sorted = Object.entries(catCounts).sort((a, b) => b[1] - a[1]);
+document.getElementById('categoryBreakdown').innerHTML = sorted.map(([id, count]) => {
+const cat = getCategory(id);
+const pct = Math.round((count / total) * 100);
+return `
+<div style="margin-bottom: 14px;">
+    <div
+        style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px;">
+        <span>${cat.icon} ${cat.label}</span>
+        <span style="color: var(--gray-500);">${count} (${pct}%)</span>
+    </div>
+    <div style="background: var(--gray-200); border-radius: 100px; height: 8px; overflow: hidden;">
+        <div
+            style="background: linear-gradient(90deg, var(--red), var(--red-light)); height: 100%; width: ${pct}%; border-radius: 100px; transition: width 0.6s ease;">
+        </div>
+    </div>
+</div>`;
+}).join('');
+}
+
+function renderTable() {
+const statusFilter = document.getElementById('dashStatusFilter').value;
+const catFilter = document.getElementById('dashCatFilter').value;
+let reports = loadReports();
+if (statusFilter !== 'all') reports = reports.filter(r => r.status === statusFilter);
+if (catFilter !== 'all') reports = reports.filter(r => r.category === catFilter);
+
+document.getElementById('tableBody').innerHTML = reports.map(r => {
+const cat = getCategory(r.category);
+const st = getStatus(r.status);
+return `
+<tr>
+    <td>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="${r.photo}" class="report-thumb"
+                onerror="this.style.background='#eee';this.removeAttribute('src');" />
+            <div>
+                <div
+                    style="font-weight: 600; font-size: 0.88rem; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    ${r.title}</div>
+                <div style="font-size: 0.75rem; color: var(--gray-400);">${r.id}</div>
+            </div>
+        </div>
+    </td>
+    <td><span class="badge badge-cat">${cat.icon} ${cat.label}</span></td>
+    <td style="font-size: 0.85rem;"> ${r.city}</td>
+    <td style="font-weight: 700; color: var(--red);"> ${r.upvotes}</td>
+    <td><span class="badge badge-${r.status}">${st.icon} ${st.label}</span></td>
+    <td style="font-size: 0.8rem; color: var(--gray-500);">${formatDate(r.createdAt)}</td>
+    <td>
+        <div style="display: flex; gap: 6px;">
+            <button class="btn btn-primary btn-sm" onclick="openUpdateModal('${r.id}')">Update</button>
+            <a href="report.html?id=${r.id}" class="btn btn-ghost btn-sm">Detail</a>
+        </div>
+    </td>
+</tr>`;
+}).join('');
+}
+
+function openUpdateModal(id) {
+selectedReportId = id;
+const reports = loadReports();
+const r = reports.find(r => r.id === id);
+document.getElementById('modalReportTitle').textContent = r.title;
+document.getElementById('modalReportId').textContent = r.id + ' · ' + r.city;
+document.getElementById('newStatusSelect').value = r.status;
+document.getElementById('deptSelect').value = r.department || '';
+document.getElementById('updateNote').value = '';
+document.getElementById('statusModal').classList.add('open');
+}
+function closeModal() { document.getElementById('statusModal').classList.remove('open'); }
+
+function saveStatus() {
+const reports = loadReports();
+const r = reports.find(r => r.id === selectedReportId);
+const newStatus = document.getElementById('newStatusSelect').value;
+const dept = document.getElementById('deptSelect').value;
+const note = document.getElementById('updateNote').value || 'Status diperbarui oleh admin';
+r.status = newStatus;
+r.department = dept || r.department;
+r.updatedAt = new Date().toISOString();
+if (!r.timeline) r.timeline = [];
+r.timeline.push({ status: newStatus, date: new Date().toISOString(), note });
+saveReports(reports);
+closeModal();
+renderOverview();
+renderTable();
+showToast('Status berhasil diperbarui! ', `${r.title} → ${getStatus(newStatus).label}`);
+}
+
+function initDashMap() {
+if (dashMap) return;
+dashMap = L.map('dashMap').setView([-2.5, 118], 5);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(dashMap);
+const reports = loadReports();
+const colors = { dilaporkan: '#E63946', diverifikasi: '#F59E0B', diproses: '#3B82F6', selesai: '#2DC653' };
+reports.forEach(r => {
+const cat = getCategory(r.category);
+const icon = L.divIcon({
+html: `<div
+    style="background:${colors[r.status] || '#E63946'};width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:1rem;box-shadow:0 4px 12px rgba(0,0,0,0.3);border:3px solid white;">
+    ${cat.icon}</div>`,
+className: '', iconSize: [36, 36], iconAnchor: [18, 18]
+});
+L.marker([r.lat, r.lng], { icon }).addTo(dashMap)
+.bindPopup(`<strong>${r.title}</strong><br> ${r.upvotes} · ${getStatus(r.status).label}<br><a
+    href="report.html?id=${r.id}">Lihat Detail →</a>`);
+});
+}
+
+function renderAnalytics() {
+const reports = loadReports();
+// City stats
+const cities = {};
+reports.forEach(r => { cities[r.city] = (cities[r.city] || 0) + 1; });
+document.getElementById('cityStats').innerHTML = Object.entries(cities).sort((a, b) => b[1] - a[1]).map(([city, count])
+=> `
+<div
+    style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--gray-100);">
+    <span style="font-weight: 600;"> ${city}</span>
+    <span style="font-weight: 800; color: var(--red);">${count} laporan</span>
+</div>`).join('');
+
+// Category stats
+const cats = {};
+reports.forEach(r => { cats[r.category] = (cats[r.category] || 0) + 1; });
+document.getElementById('catStats').innerHTML = Object.entries(cats).sort((a, b) => b[1] - a[1]).map(([id, count]) => {
+const cat = getCategory(id);
+return `<div
+    style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--gray-100);">
+    <span style="font-weight: 600;">${cat.icon} ${cat.label}</span>
+    <span style="font-weight: 800; color: var(--red);">${count}</span>
+</div>`;
+}).join('');
+
+// Leaderboard
+document.getElementById('wargaStats').innerHTML = LEADERBOARD.map((u, i) => `
+<div style="display: flex; align-items: center; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--gray-100);">
+    <span style="font-size: 1.5rem;">${['1', '2', '3', '4', '5'][i]}</span>
+    <div style="flex: 1;">
+        <div style="font-weight: 700;">${u.name}</div>
+        <div style="font-size: 0.8rem; color: var(--gray-400);"> ${u.city} · ${u.badge}</div>
+    </div>
+    <div style="text-align: right;">
+        <div style="font-weight: 800; color: var(--red);">${u.reports} laporan</div>
+        <div style="font-size: 0.78rem; color: var(--yellow); font-weight: 700;">${u.points.toLocaleString('id-ID')}
+            poin</div>
+    </div>
+</div>`).join('');
+}
+
+function showToast(title, body) {
+document.getElementById('toastTitle').textContent = title;
+document.getElementById('toastBody').textContent = body;
+const t = document.getElementById('toast');
+t.classList.add('show');
+setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// Initial render
+renderOverview();
+</script>
 </body>
 
 </html>

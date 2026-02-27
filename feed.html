@@ -52,8 +52,8 @@
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="statusFilters">
                     <button class="filter-chip active" data-filter="all"
                         onclick="filterBy('status','all',this)">Semua</button>
-                    <button class="filter-chip" data-filter="dilaporkan"
-                        onclick="filterBy('status','dilaporkan',this)"> Dilaporkan</button>
+                    <button class="filter-chip" data-filter="dilaporkan" onclick="filterBy('status','dilaporkan',this)">
+                        Dilaporkan</button>
                     <button class="filter-chip" data-filter="diverifikasi"
                         onclick="filterBy('status','diverifikasi',this)"> Diverifikasi</button>
                     <button class="filter-chip" data-filter="diproses" onclick="filterBy('status','diproses',this)">
@@ -105,9 +105,8 @@
     <script src="js/data.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        initData();
-        let allReports = loadReports();
-        let filtered = [...allReports];
+        let allReports = [];
+        let filtered = [];
         let activeStatus = 'all';
         let activeCategory = 'all';
         let activeSort = 'newest';
@@ -119,7 +118,7 @@
         CATEGORIES.forEach(c => {
             const opt = document.createElement('option');
             opt.value = c.id;
-            opt.textContent = `${c.icon} ${c.label}`;
+            opt.textContent = `${c.label}`;
             catSelect.appendChild(opt);
         });
 
@@ -158,23 +157,22 @@
             grid.innerHTML = reports.map(r => {
                 const cat = getCategory(r.category);
                 const st = getStatus(r.status);
-                const upvoted = (r.upvotedBy || []).includes('me');
                 return `
         <div class="report-card" onclick="location.href='report.html?id=${r.id}'">
           <img class="report-card-img" src="${r.photo}" alt="${r.title}" onerror="this.style.background='#f3f4f6';this.removeAttribute('src');" />
           <div class="report-card-body">
             <div class="report-card-header">
               <div class="report-card-title">${r.title}</div>
-              <span class="badge badge-${r.status}" style="flex-shrink:0;">${st.icon} ${st.label}</span>
+              <span class="badge badge-${r.status}" style="flex-shrink:0;">${st.label}</span>
             </div>
             <div style="font-size: 0.82rem; color: var(--gray-500); margin-top: 6px; display: -webkit-box; -webkit-line-clamp:2; -webkit-box-orient: vertical; overflow: hidden;">${r.description}</div>
             <div class="report-card-meta">
-              <span>${cat.icon} ${cat.label}</span>
-              <span> ${r.city}</span>
+              <span>${cat.label}</span>
+              <span>${r.city}</span>
             </div>
             <div class="report-card-footer">
-              <span style="font-size:0.78rem; color:var(--gray-500);"> ${timeAgo(r.createdAt)}</span>
-              <button class="upvote-btn ${upvoted ? 'active' : ''}" onclick="event.stopPropagation(); upvote('${r.id}', this)">
+              <span style="font-size:0.78rem; color:var(--gray-500);">${timeAgo(r.createdAt)}</span>
+              <button class="upvote-btn" id="upvote-${r.id}" onclick="event.stopPropagation(); upvote('${r.id}', this)">
                 <span class="icon"></span> <span class="count">${r.upvotes.toLocaleString('id-ID')}</span>
               </button>
             </div>
@@ -196,32 +194,33 @@
         function applyCategoryFilter() { activeCategory = catSelect.value; renderFeed(); }
         function applySort() { activeSort = document.getElementById('sortSelect').value; renderFeed(); }
 
-        function upvote(id, btn) {
-            const reports = loadReports();
-            const r = reports.find(r => r.id === id);
-            if (!r) return;
-            if (!r.upvotedBy) r.upvotedBy = [];
-            if (r.upvotedBy.includes('me')) {
-                r.upvotes--;
-                r.upvotedBy = r.upvotedBy.filter(u => u !== 'me');
-                btn.classList.remove('active');
-                showToast('Upvote dibatalkan', r.title);
-            } else {
-                r.upvotes++;
-                r.upvotedBy.push('me');
-                btn.classList.add('active');
-                showToast('Terima kasih! ', 'Kamu mendukung: ' + r.title);
+        async function upvote(id, btn) {
+            btn.disabled = true;
+            try {
+                const result = await apiUpvote(id);
+                btn.querySelector('.count').textContent = result.upvotes.toLocaleString('id-ID');
+                if (result.upvoted) {
+                    btn.classList.add('active');
+                    showToast('Terima kasih!', 'Dukungan kamu sudah tercatat.');
+                } else {
+                    btn.classList.remove('active');
+                    showToast('Upvote dibatalkan', '');
+                }
+                // Update local cache
+                const r = allReports.find(r => r.id === id);
+                if (r) r.upvotes = result.upvotes;
+            } catch (e) {
+                showToast('Gagal', 'Coba lagi sebentar.');
+            } finally {
+                btn.disabled = false;
             }
-            btn.querySelector('.count').textContent = r.upvotes.toLocaleString('id-ID');
-            allReports = reports;
-            saveReports(reports);
         }
 
         function toggleView() {
             mapView = !mapView;
             document.getElementById('mapContainer').style.display = mapView ? 'block' : 'none';
             document.getElementById('feedGrid').style.display = mapView ? 'none' : 'grid';
-            document.getElementById('viewToggle').textContent = mapView ? ' Tampilan Daftar' : ' Tampilan Peta';
+            document.getElementById('viewToggle').textContent = mapView ? 'Tampilan Daftar' : 'Tampilan Peta';
             if (mapView) renderMap();
         }
 
@@ -238,16 +237,176 @@
                 const cat = getCategory(r.category);
                 const st = getStatus(r.status);
                 const icon = L.divIcon({
-                    html: `<div style="background:${r.status === 'selesai' ? '#2DC653' : r.status === 'diproses' ? '#3B82F6' : '#E63946'};width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:1rem;box-shadow:0 4px 12px rgba(0,0,0,0.3);border:3px solid white;">${cat.icon}</div>`,
+                    html: `<div style="background:${r.status === 'selesai' ? '#2DC653' : r.status === 'diproses' ? '#3B82F6' : '#E63946'};width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:0.8rem;font-weight:700;box-shadow:0 4px 12px rgba(0,0,0,0.3);border:3px solid white;">${cat.label[0]}</div>`,
                     className: '', iconSize: [32, 32], iconAnchor: [16, 16]
                 });
                 const marker = L.marker([r.lat, r.lng], { icon }).addTo(feedMap);
-                marker.bindPopup(`<strong>${r.title}</strong><br>${cat.label} · ${st.label}<br><a href="report.html?id=${r.id}">Lihat Detail →</a>`);
+                marker.bindPopup(`<strong>${r.title}</strong><br>${cat.label} · ${st.label}<br><a href="report.html?id=${r.id}">Lihat Detail</a>`);
             });
         }
 
-        renderFeed();
+        // Load data from API
+        document.getElementById('reportCount').textContent = 'Memuat laporan...';
+        apiLoadReports().then(reports => {
+            allReports = reports;
+            renderFeed();
+        }).catch(() => {
+            document.getElementById('reportCount').textContent = 'Gagal memuat laporan. Pastikan server berjalan.';
+        });
     </script>
+</body>
+
+</html>
+
+let filtered = [...allReports];
+let activeStatus = 'all';
+let activeCategory = 'all';
+let activeSort = 'newest';
+let mapView = false;
+let feedMap = null;
+
+// Populate category filter
+const catSelect = document.getElementById('categoryFilter');
+CATEGORIES.forEach(c => {
+const opt = document.createElement('option');
+opt.value = c.id;
+opt.textContent = `${c.icon} ${c.label}`;
+catSelect.appendChild(opt);
+});
+
+function showToast(title, body) {
+document.getElementById('toastTitle').textContent = title;
+document.getElementById('toastBody').textContent = body;
+const t = document.getElementById('toast');
+t.classList.add('show');
+setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function renderFeed() {
+const grid = document.getElementById('feedGrid');
+const empty = document.getElementById('emptyState');
+
+let reports = [...allReports];
+if (activeStatus !== 'all') reports = reports.filter(r => r.status === activeStatus);
+if (activeCategory !== 'all') reports = reports.filter(r => r.category === activeCategory);
+
+if (activeSort === 'popular') reports.sort((a, b) => b.upvotes - a.upvotes);
+else if (activeSort === 'unresolved') reports = reports.filter(r => r.status !== 'selesai').sort((a, b) => new
+Date(b.createdAt) - new Date(a.createdAt));
+else reports.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+filtered = reports;
+document.getElementById('reportCount').textContent = `${reports.length} laporan ditemukan`;
+
+if (reports.length === 0) {
+grid.style.display = 'none';
+empty.style.display = 'block';
+return;
+}
+
+grid.style.display = 'grid';
+empty.style.display = 'none';
+
+grid.innerHTML = reports.map(r => {
+const cat = getCategory(r.category);
+const st = getStatus(r.status);
+const upvoted = (r.upvotedBy || []).includes('me');
+return `
+<div class="report-card" onclick="location.href='report.html?id=${r.id}'">
+    <img class="report-card-img" src="${r.photo}" alt="${r.title}"
+        onerror="this.style.background='#f3f4f6';this.removeAttribute('src');" />
+    <div class="report-card-body">
+        <div class="report-card-header">
+            <div class="report-card-title">${r.title}</div>
+            <span class="badge badge-${r.status}" style="flex-shrink:0;">${st.icon} ${st.label}</span>
+        </div>
+        <div
+            style="font-size: 0.82rem; color: var(--gray-500); margin-top: 6px; display: -webkit-box; -webkit-line-clamp:2; -webkit-box-orient: vertical; overflow: hidden;">
+            ${r.description}</div>
+        <div class="report-card-meta">
+            <span>${cat.icon} ${cat.label}</span>
+            <span> ${r.city}</span>
+        </div>
+        <div class="report-card-footer">
+            <span style="font-size:0.78rem; color:var(--gray-500);"> ${timeAgo(r.createdAt)}</span>
+            <button class="upvote-btn ${upvoted ? 'active' : ''}"
+                onclick="event.stopPropagation(); upvote('${r.id}', this)">
+                <span class="icon"></span> <span class="count">${r.upvotes.toLocaleString('id-ID')}</span>
+            </button>
+        </div>
+    </div>
+</div>`;
+}).join('');
+}
+
+function filterBy(type, value, el) {
+if (type === 'status') {
+activeStatus = value;
+document.querySelectorAll('#statusFilters .filter-chip').forEach(b => b.classList.remove('active'));
+el.classList.add('active');
+}
+renderFeed();
+if (mapView) renderMap();
+}
+
+function applyCategoryFilter() { activeCategory = catSelect.value; renderFeed(); }
+function applySort() { activeSort = document.getElementById('sortSelect').value; renderFeed(); }
+
+function upvote(id, btn) {
+const reports = loadReports();
+const r = reports.find(r => r.id === id);
+if (!r) return;
+if (!r.upvotedBy) r.upvotedBy = [];
+if (r.upvotedBy.includes('me')) {
+r.upvotes--;
+r.upvotedBy = r.upvotedBy.filter(u => u !== 'me');
+btn.classList.remove('active');
+showToast('Upvote dibatalkan', r.title);
+} else {
+r.upvotes++;
+r.upvotedBy.push('me');
+btn.classList.add('active');
+showToast('Terima kasih! ', 'Kamu mendukung: ' + r.title);
+}
+btn.querySelector('.count').textContent = r.upvotes.toLocaleString('id-ID');
+allReports = reports;
+saveReports(reports);
+}
+
+function toggleView() {
+mapView = !mapView;
+document.getElementById('mapContainer').style.display = mapView ? 'block' : 'none';
+document.getElementById('feedGrid').style.display = mapView ? 'none' : 'grid';
+document.getElementById('viewToggle').textContent = mapView ? ' Tampilan Daftar' : ' Tampilan Peta';
+if (mapView) renderMap();
+}
+
+function renderMap() {
+if (!feedMap) {
+feedMap = L.map('feedMap').setView([-2.548926, 118.0148634], 5);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+attribution: '© OpenStreetMap'
+}).addTo(feedMap);
+}
+feedMap.eachLayer(l => { if (l instanceof L.Marker) feedMap.removeLayer(l); });
+
+filtered.forEach(r => {
+const cat = getCategory(r.category);
+const st = getStatus(r.status);
+const icon = L.divIcon({
+html: `<div
+    style="background:${r.status === 'selesai' ? '#2DC653' : r.status === 'diproses' ? '#3B82F6' : '#E63946'};width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:1rem;box-shadow:0 4px 12px rgba(0,0,0,0.3);border:3px solid white;">
+    ${cat.icon}</div>`,
+className: '', iconSize: [32, 32], iconAnchor: [16, 16]
+});
+const marker = L.marker([r.lat, r.lng], { icon }).addTo(feedMap);
+marker.bindPopup(`<strong>${r.title}</strong><br>${cat.label} · ${st.label}<br><a href="report.html?id=${r.id}">Lihat
+    Detail →</a>`);
+});
+}
+
+renderFeed();
+</script>
 </body>
 
 </html>
