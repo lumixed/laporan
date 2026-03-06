@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Masuk / Daftar – LaporIn</title>
+    <meta name="description" content="Login atau daftar akun LaporIn untuk melaporkan masalah publik di Indonesia." />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'></text></svg>" />
+    <style>
+        .auth-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            padding: 24px;
+        }
+
+        .auth-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 460px;
+            box-shadow: 0 32px 80px rgba(0, 0, 0, 0.4);
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .auth-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--red);
+            margin-bottom: 28px;
+        }
+
+        .auth-logo .logo-icon {
+            width: 36px;
+            height: 36px;
+        }
+
+        .auth-tabs {
+            display: flex;
+            background: var(--gray-100);
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 28px;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--gray-500);
+            border: none;
+            background: transparent;
+        }
+
+        .auth-tab.active {
+            background: white;
+            color: var(--gray-900);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .auth-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+            color: var(--gray-900);
+        }
+
+        .auth-subtitle {
+            font-size: 0.88rem;
+            color: var(--gray-500);
+            margin-bottom: 24px;
+        }
+
+        .role-switcher {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .role-btn {
+            flex: 1;
+            padding: 14px 12px;
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .role-btn:hover {
+            border-color: var(--red-light);
+        }
+
+        .role-btn.selected {
+            border-color: var(--red);
+            background: rgba(230, 57, 70, 0.05);
+        }
+
+        .role-btn-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            margin: 0 auto 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1rem;
+            color: white;
+        }
+
+        .role-btn-icon.netizen {
+            background: linear-gradient(135deg, var(--red), var(--red-dark));
+        }
+
+        .role-btn-icon.gov {
+            background: linear-gradient(135deg, #1a56db, #0e3c8e);
+        }
+
+        .role-btn-label {
+            font-weight: 700;
+            font-size: 0.88rem;
+            color: var(--gray-800);
+            margin-bottom: 2px;
+        }
+
+        .role-btn-desc {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+
+        .gov-code-field {
+            display: none;
+            margin-bottom: 16px;
+        }
+
+        .gov-code-field.visible {
+            display: block;
+        }
+
+        .gov-code-note {
+            font-size: 0.78rem;
+            color: #b45309;
+            background: #fef3c7;
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-top: 6px;
+        }
+
+        .auth-error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .auth-error.visible {
+            display: block;
+        }
+
+        .auth-success {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .auth-success.visible {
+            display: block;
+        }
+
+        .auth-divider {
+            text-align: center;
+            font-size: 0.82rem;
+            color: var(--gray-400);
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .auth-divider::before,
+        .auth-divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 42%;
+            height: 1px;
+            background: var(--gray-200);
+        }
+
+        .auth-divider::before {
+            left: 0;
+        }
+
+        .auth-divider::after {
+            right: 0;
+        }
+
+        .auth-footer {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--gray-500);
+            margin-top: 20px;
+        }
+
+        .auth-footer a {
+            color: var(--red);
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="auth-page">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <div class="logo-icon"></div>
+                LaporIn
+            </div>
+
+            <!-- Login / Register tabs -->
+            <div class="auth-tabs">
+                <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Masuk</button>
+                <button class="auth-tab" id="tabRegister" onclick="switchTab('register')">Daftar</button>
+            </div>
+
+            <!-- Error / Success -->
+            <div class="auth-error" id="authError"></div>
+            <div class="auth-success" id="authSuccess"></div>
+
+            <!-- LOGIN FORM -->
+            <div id="loginForm">
+                <div class="auth-title">Selamat datang kembali</div>
+                <div class="auth-subtitle">Masuk untuk melanjutkan ke LaporIn</div>
+
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-control" id="loginEmail" placeholder="nama@email.com" />
+                </div>
+                <div class="form-group" style="margin-bottom: 24px;">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-control" id="loginPassword" placeholder="Masukkan password" />
+                </div>
+
+                <button class="btn btn-primary w-full" id="loginBtn" onclick="handleLogin()">Masuk</button>
+
+                <div class="auth-divider">atau</div>
+
+                <div class="auth-footer">
+                    Belum punya akun? <a href="#" onclick="switchTab('register'); return false;">Daftar sekarang</a>
+                </div>
+            </div>
+
+            <!-- REGISTER FORM -->
+            <div id="registerForm" style="display: none;">
+                <div class="auth-title">Buat akun baru</div>
+                <div class="auth-subtitle">Pilih tipe akun yang sesuai</div>
+
+                <!-- Role selector -->
+                <div class="role-switcher">
+                    <div class="role-btn selected" id="roleNetizen" onclick="selectRole('netizen')">
+                        <div class="role-btn-icon netizen">W</div>
+                        <div class="role-btn-label">Warga</div>
+                        <div class="role-btn-desc">Laporkan masalah di sekitar Anda</div>
+                    </div>
+                    <div class="role-btn" id="roleGovernment" onclick="selectRole('government')">
+                        <div class="role-btn-icon gov">P</div>
+                        <div class="role-btn-label">Pemerintah</div>
+                        <div class="role-btn-desc">Kelola & tindak lanjut laporan</div>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label class="form-label">Nama Lengkap</label>
+                    <input type="text" class="form-control" id="regName" placeholder="Nama Anda" />
+                </div>
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-control" id="regEmail" placeholder="nama@email.com" />
+                </div>
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-control" id="regPassword" placeholder="Minimal 6 karakter" />
+                </div>
+
+                <!-- Gov code field (only shown when gov role selected) -->
+                <div class="gov-code-field" id="govCodeField">
+                    <label class="form-label">Kode Registrasi Pemerintah</label>
+                    <input type="text" class="form-control" id="govCode"
+                        placeholder="Kode khusus instansi pemerintah" />
+                    <div class="gov-code-note">Kode ini diterbitkan oleh Kemkominfo untuk instansi pemerintah yang
+                        terverifikasi.</div>
+                </div>
+
+                <button class="btn btn-primary w-full" id="registerBtn" onclick="handleRegister()"
+                    style="margin-top: 8px;">Buat Akun</button>
+
+                <div class="auth-divider">atau</div>
+
+                <div class="auth-footer">
+                    Sudah punya akun? <a href="#" onclick="switchTab('login'); return false;">Masuk di sini</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script>
+        // Check if already logged in
+        const existingUser = getCurrentUser();
+        if (existingUser) {
+            const redirect = new URLSearchParams(window.location.search).get('redirect') || 'index.html';
+            window.location.href = redirect;
+        }
+
+        let selectedRole = 'netizen';
+
+        function switchTab(tab) {
+            const isLogin = tab === 'login';
+            document.getElementById('loginForm').style.display = isLogin ? 'block' : 'none';
+            document.getElementById('registerForm').style.display = isLogin ? 'none' : 'block';
+            document.getElementById('tabLogin').classList.toggle('active', isLogin);
+            document.getElementById('tabRegister').classList.toggle('active', !isLogin);
+            clearMessages();
+        }
+
+        function selectRole(role) {
+            selectedRole = role;
+            document.getElementById('roleNetizen').classList.toggle('selected', role === 'netizen');
+            document.getElementById('roleGovernment').classList.toggle('selected', role === 'government');
+            document.getElementById('govCodeField').classList.toggle('visible', role === 'government');
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('authError');
+            el.textContent = msg;
+            el.classList.add('visible');
+            document.getElementById('authSuccess').classList.remove('visible');
+        }
+
+        function showSuccess(msg) {
+            const el = document.getElementById('authSuccess');
+            el.textContent = msg;
+            el.classList.add('visible');
+            document.getElementById('authError').classList.remove('visible');
+        }
+
+        function clearMessages() {
+            document.getElementById('authError').classList.remove('visible');
+            document.getElementById('authSuccess').classList.remove('visible');
+        }
+
+        async function handleLogin() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            if (!email || !password) { showError('Harap isi email dan password.'); return; }
+
+            const btn = document.getElementById('loginBtn');
+            btn.disabled = true;
+            btn.textContent = 'Memproses...';
+            clearMessages();
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                if (!res.ok) { showError(data.error || 'Gagal masuk.'); return; }
+
+                saveAuth(data.token, data.user);
+                showSuccess('Berhasil masuk! Mengalihkan...');
+
+                setTimeout(() => {
+                    const redirect = new URLSearchParams(window.location.search).get('redirect');
+                    if (redirect) { window.location.href = redirect; }
+                    else if (data.user.role === 'government') { window.location.href = 'dashboard.html'; }
+                    else { window.location.href = 'index.html'; }
+                }, 800);
+            } catch (e) {
+                showError('Tidak dapat terhubung ke server. Pastikan server berjalan.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Masuk';
+            }
+        }
+
+        async function handleRegister() {
+            const name = document.getElementById('regName').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const govCode = document.getElementById('govCode').value.trim();
+
+            if (!name || !email || !password) { showError('Harap isi semua kolom yang wajib.'); return; }
+            if (password.length < 6) { showError('Password minimal 6 karakter.'); return; }
+
+            const btn = document.getElementById('registerBtn');
+            btn.disabled = true;
+            btn.textContent = 'Memproses...';
+            clearMessages();
+
+            try {
+                const body = { name, email, password, role: selectedRole };
+                if (selectedRole === 'government') body.govCode = govCode;
+
+                const res = await fetch('/api/auth/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                if (!res.ok) { showError(data.error || 'Gagal mendaftar.'); return; }
+
+                saveAuth(data.token, data.user);
+                showSuccess('Akun berhasil dibuat! Mengalihkan...');
+
+                setTimeout(() => {
+                    const redirect = new URLSearchParams(window.location.search).get('redirect');
+                    if (redirect) { window.location.href = redirect; }
+                    else if (data.user.role === 'government') { window.location.href = 'dashboard.html'; }
+                    else { window.location.href = 'index.html'; }
+                }, 800);
+            } catch (e) {
+                showError('Tidak dapat terhubung ke server. Pastikan server berjalan.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Buat Akun';
+            }
+        }
+
+        // Allow Enter key to submit
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const loginVisible = document.getElementById('loginForm').style.display !== 'none';
+                if (loginVisible) handleLogin();
+                else handleRegister();
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -23,13 +23,7 @@
             <li><a href="submit.html">Buat Laporan</a></li>
             <li><a href="dashboard.html" class="active">Dashboard Pemerintah</a></li>
         </ul>
-        <div class="navbar-actions">
-            <span style="font-size: 0.85rem; color: var(--gray-500);">Selamat datang, <strong>Admin DKI
-                    Jakarta</strong></span>
-            <div
-                style="width: 36px; height: 36px; border-radius: 50%; background: var(--red); display: flex; align-items: center; justify-content: center; color: white; font-weight: 800;">
-                A</div>
-        </div>
+        <div class="navbar-actions" id="navActions"></div>
     </nav>
 
     <div class="page-content">
@@ -300,6 +294,17 @@
     <script src="js/data.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
+        // Gov auth guard
+        const currentUser = requireGovAuth();
+        if (!currentUser) throw new Error('redirect');
+
+        // Navbar
+        (function () {
+            const nav = document.getElementById('navActions');
+            nav.innerHTML = `<span style="font-size:0.85rem;color:var(--gray-500);">Selamat datang, <strong>${currentUser.name}</strong></span>
+                <button class="btn btn-ghost" onclick="logout()">Keluar</button>`;
+        })();
+
         let selectedReportId = null;
         let allReports = [];
         let dashMap = null;

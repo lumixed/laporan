@@ -25,9 +25,7 @@
             <li><a href="submit.html">Buat Laporan</a></li>
             <li><a href="dashboard.html">Dashboard Pemerintah</a></li>
         </ul>
-        <div class="navbar-actions">
-            <a href="submit.html" class="btn btn-primary"> Laporkan Sekarang</a>
-        </div>
+        <div class="navbar-actions" id="navActions"></div>
     </nav>
 
     <div class="page-content">
@@ -105,6 +103,18 @@
     <script src="js/data.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
+        // Navbar auth
+        (function () {
+            const u = getCurrentUser();
+            const nav = document.getElementById('navActions');
+            if (u) {
+                nav.innerHTML = `<span style="font-size:0.85rem;color:var(--gray-500);">Halo, <strong>${u.name}</strong></span>
+                    <button class="btn btn-ghost" onclick="logout()">Keluar</button>`;
+            } else {
+                nav.innerHTML = `<a href="auth.html" class="btn btn-ghost">Masuk</a>
+                    <a href="submit.html" class="btn btn-primary">Laporkan Sekarang</a>`;
+            }
+        })();
         let allReports = [];
         let filtered = [];
         let activeStatus = 'all';

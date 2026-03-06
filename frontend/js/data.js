@@ -3,6 +3,52 @@
 
 const API_BASE = 'http://localhost:3001/api';
 
+// ─── Auth helpers ──────────────────────────────────────────────────────────
+
+function saveAuth(token, user) {
+    localStorage.setItem('laporan_token', token);
+    localStorage.setItem('laporan_user', JSON.stringify(user));
+}
+
+function getCurrentUser() {
+    try { return JSON.parse(localStorage.getItem('laporan_user')); } catch { return null; }
+}
+
+function getAuthToken() {
+    return localStorage.getItem('laporan_token');
+}
+
+function getAuthHeaders() {
+    const token = getAuthToken();
+    return token ? { 'Authorization': 'Bearer ' + token } : {};
+}
+
+function logout() {
+    localStorage.removeItem('laporan_token');
+    localStorage.removeItem('laporan_user');
+    window.location.href = 'index.html';
+}
+
+function requireAuth(redirectBack) {
+    const user = getCurrentUser();
+    if (!user) {
+        const url = 'auth.html' + (redirectBack ? '?redirect=' + encodeURIComponent(redirectBack) : '');
+        window.location.href = url;
+        return null;
+    }
+    return user;
+}
+
+function requireGovAuth() {
+    const user = requireAuth(window.location.pathname.split('/').pop());
+    if (user && user.role !== 'government') {
+        alert('Halaman ini hanya untuk akun pemerintah.');
+        window.location.href = 'index.html';
+        return null;
+    }
+    return user;
+}
+
 const CATEGORIES = [
     { id: 'jalan', label: 'Jalan Rusak', icon: '', color: '#e74c3c' },
     { id: 'sungai', label: 'Sungai Kotor', icon: '', color: '#2980b9' },
@@ -106,7 +152,7 @@ async function apiAddComment(reportId, text, user = 'Anda') {
 async function apiUpdateStatus(reportId, status, department, note) {
     const res = await fetch(`${API_BASE}/reports/${reportId}/status`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({ status, department, note }),
     });
     if (!res.ok) throw new Error('Status update failed');

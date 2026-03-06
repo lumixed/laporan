@@ -25,9 +25,7 @@
             <li><a href="submit.html" class="active">Buat Laporan</a></li>
             <li><a href="dashboard.html">Dashboard Pemerintah</a></li>
         </ul>
-        <div class="navbar-actions">
-            <a href="submit.html" class="btn btn-primary"> Laporkan Sekarang</a>
-        </div>
+        <div class="navbar-actions" id="navActions"></div>
     </nav>
 
     <div class="page-content">
@@ -223,6 +221,16 @@
     <script src="js/data.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
+        // Auth guard
+        const currentUser = requireAuth('submit.html');
+        if (!currentUser) throw new Error('redirect');
+
+        // Navbar
+        (function () {
+            const nav = document.getElementById('navActions');
+            nav.innerHTML = `<span style="font-size:0.85rem;color:var(--gray-500);">Halo, <strong>${currentUser.name}</strong></span>
+                <button class="btn btn-ghost" onclick="logout()">Keluar</button>`;
+        })();
         let currentStep = 1;
         let selectedCategory = null;
         let reportLat = -6.2088, reportLng = 106.8456;

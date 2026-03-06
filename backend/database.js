@@ -24,6 +24,15 @@ function allAsync(sql, params = []) {
 }
 
 async function initDb() {
+    await runAsync(`CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        email TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL,
+        role TEXT NOT NULL DEFAULT 'netizen',
+        created_at TEXT NOT NULL
+    )`);
+
     await runAsync(`CREATE TABLE IF NOT EXISTS reports (
         id TEXT PRIMARY KEY,
         title TEXT NOT NULL,
@@ -69,6 +78,18 @@ async function initDb() {
     const count = await getAsync('SELECT COUNT(*) as c FROM reports');
     if (count.c === 0) {
         await seedData();
+    }
+
+    // Seed default government account if none exists
+    const bcrypt = require('bcryptjs');
+    const govExists = await getAsync("SELECT id FROM users WHERE role='government'");
+    if (!govExists) {
+        const hash = await bcrypt.hash('admin123', 10);
+        await runAsync(
+            `INSERT INTO users (name, email, password, role, created_at) VALUES (?, ?, ?, 'government', ?)`,
+            ['Admin Pemerintah', 'admin@laporan.go.id', hash, new Date().toISOString()]
+        );
+        console.log('Default gov account: admin@laporan.go.id / admin123');
     }
 }
 

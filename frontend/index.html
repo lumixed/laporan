@@ -25,10 +25,8 @@
             <li><a href="submit.html">Buat Laporan</a></li>
             <li><a href="dashboard.html">Dashboard Pemerintah</a></li>
         </ul>
-        <div class="navbar-actions">
-            <a href="submit.html" class="btn btn-primary">
-                Laporkan Sekarang
-            </a>
+        <div class="navbar-actions" id="navActions">
+            <!-- filled by JS -->
         </div>
         <button class="hamburger btn btn-ghost" onclick="toggleMenu()" id="hamburger"></button>
     </nav>
@@ -258,6 +256,19 @@
 
     <script src="js/data.js"></script>
     <script>
+        // Navbar auth
+        (function () {
+            const u = getCurrentUser();
+            const nav = document.getElementById('navActions');
+            if (u) {
+                nav.innerHTML = `<span style="font-size:0.85rem;color:var(--gray-300);">Halo, <strong>${u.name}</strong></span>
+                    <button class="btn btn-ghost" onclick="logout()" style="color:white;">Keluar</button>`;
+            } else {
+                nav.innerHTML = `<a href="auth.html" class="btn btn-ghost" style="color:white;">Masuk</a>
+                    <a href="submit.html" class="btn btn-primary">Laporkan Sekarang</a>`;
+            }
+        })();
+
         // Init
         initData();
 

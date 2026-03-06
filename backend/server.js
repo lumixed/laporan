@@ -2,15 +2,36 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const multer = require('multer');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const { db, runAsync, getAsync, allAsync, initDb } = require('./database');
 
 const app = express();
 const PORT = 3001;
+const JWT_SECRET = 'laporan-secret-key-2025';
 
 app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.static(path.join(__dirname, '../frontend')));
+
+// ─── Auth Middleware ───────────────────────────────────────────────────────
+
+function authRequired(req, res, next) {
+    const header = req.headers['authorization'];
+    if (!header) return res.status(401).json({ error: 'Login required' });
+    try {
+        req.user = jwt.verify(header.replace('Bearer ', ''), JWT_SECRET);
+        next();
+    } catch { res.status(401).json({ error: 'Invalid or expired token' }); }
+}
+
+function govRequired(req, res, next) {
+    authRequired(req, res, () => {
+        if (req.user.role !== 'government') return res.status(403).json({ error: 'Government access only' });
+        next();
+    });
+}
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, path.join(__dirname, 'uploads')),
@@ -41,6 +62,47 @@ async function generateId() {
     return `RPT-${String(row.c + 1).padStart(3, '0')}`;
 }
 
+// ─── Auth Routes ──────────────────────────────────────────────────────────
+
+app.post('/api/auth/signup', async (req, res) => {
+    try {
+        const { name, email, password, role } = req.body;
+        if (!name || !email || !password) return res.status(400).json({ error: 'Name, email and password are required' });
+        const allowedRoles = ['netizen', 'government'];
+        const userRole = allowedRoles.includes(role) ? role : 'netizen';
+        // Government signup requires a special code
+        if (userRole === 'government' && req.body.govCode !== 'LAPORAN-GOV-2025') {
+            return res.status(403).json({ error: 'Invalid government registration code' });
+        }
+        const existing = await getAsync('SELECT id FROM users WHERE email = ?', [email]);
+        if (existing) return res.status(409).json({ error: 'Email already registered' });
+        const hash = await bcrypt.hash(password, 10);
+        const result = await runAsync(
+            `INSERT INTO users (name, email, password, role, created_at) VALUES (?, ?, ?, ?, ?)`,
+            [name, email, hash, userRole, new Date().toISOString()]
+        );
+        const token = jwt.sign({ id: result.lastID, name, email, role: userRole }, JWT_SECRET, { expiresIn: '7d' });
+        res.status(201).json({ token, user: { id: result.lastID, name, email, role: userRole } });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/auth/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        if (!email || !password) return res.status(400).json({ error: 'Email and password are required' });
+        const user = await getAsync('SELECT * FROM users WHERE email = ?', [email]);
+        if (!user) return res.status(401).json({ error: 'Invalid email or password' });
+        const match = await bcrypt.compare(password, user.password);
+        if (!match) return res.status(401).json({ error: 'Invalid email or password' });
+        const token = jwt.sign({ id: user.id, name: user.name, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+        res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get('/api/auth/me', authRequired, (req, res) => {
+    res.json({ user: req.user });
+});
+
 // ─── Routes ────────────────────────────────────────────────────────────────
 
 app.get('/api/reports', async (req, res) => {
@@ -59,7 +121,7 @@ app.get('/api/reports/:id', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.post('/api/reports', upload.single('photo'), async (req, res) => {
+app.post('/api/reports', authRequired, upload.single('photo'), async (req, res) => {
     try {
         const { title, description, category, city, district, address, lat, lng, reporter } = req.body;
         if (!title || !description || !category || !city) {
@@ -115,7 +177,7 @@ app.post('/api/reports/:id/comments', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.put('/api/reports/:id/status', async (req, res) => {
+app.put('/api/reports/:id/status', govRequired, async (req, res) => {
     try {
         const { status, department, note } = req.body;
         if (!status) return res.status(400).json({ error: 'Status is required' });
