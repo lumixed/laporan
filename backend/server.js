@@ -10,7 +10,7 @@ const PORT = 3001;
 app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use(express.static(path.join(__dirname, '..')));
+app.use(express.static(path.join(__dirname, '../frontend')));
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, path.join(__dirname, 'uploads')),
