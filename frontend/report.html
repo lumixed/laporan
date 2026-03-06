@@ -178,7 +178,7 @@
                 const st2 = getStatus(s);
                 return `
         <div class="timeline-item ${isDone ? 'done' : isActive ? 'active' : ''}">
-          <div class="timeline-dot">${isDone ? '' : isActive ? '●' : ''}</div>
+          <div class="timeline-dot">${isDone ? '' : isActive ? '-' : ''}</div>
           <div>
             <div class="timeline-title" style="color: ${isDone ? 'var(--green)' : isActive ? 'var(--red)' : 'var(--gray-400)'};">${st2.label}</div>
             ${timelineEntry ? `<div class="timeline-note">${timelineEntry.note}</div><div class="timeline-date">${formatDate(timelineEntry.date)}</div>` : '<div class="timeline-note" style="color:var(--gray-300);">Menunggu...</div>'}

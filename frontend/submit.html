@@ -275,7 +275,7 @@
 
             document.querySelectorAll('.step-ind div:first-child').forEach((d, i) => {
                 const stepNum = i + 1;
-                if (stepNum < n) { d.style.background = 'var(--green)'; d.textContent = '✓'; }
+                if (stepNum < n) { d.style.background = 'var(--green)'; d.textContent = 'v'; }
                 else if (stepNum === n) { d.style.background = 'var(--red)'; d.textContent = stepNum; }
                 else { d.style.background = 'var(--gray-300)'; d.textContent = stepNum; }
             });

@@ -4,21 +4,21 @@
 const API_BASE = 'http://localhost:3001/api';
 
 const CATEGORIES = [
-    { id: 'jalan', label: 'Jalan Rusak', icon: '&#x1F6E3;', color: '#e74c3c' },
-    { id: 'sungai', label: 'Sungai Kotor', icon: '&#x1F30A;', color: '#2980b9' },
-    { id: 'sampah', label: 'Tumpukan Sampah', icon: '&#x267B;', color: '#27ae60' },
-    { id: 'lampu', label: 'Lampu Mati', icon: '&#x1F4A1;', color: '#f39c12' },
-    { id: 'banjir', label: 'Banjir', icon: '&#x1F32A;', color: '#8e44ad' },
-    { id: 'fasilitas', label: 'Fasilitas Umum', icon: '&#x1F3DB;', color: '#16a085' },
-    { id: 'keamanan', label: 'Keamanan', icon: '&#x1F6A8;', color: '#c0392b' },
-    { id: 'lainnya', label: 'Lainnya', icon: '&#x1F4CB;', color: '#7f8c8d' },
+    { id: 'jalan', label: 'Jalan Rusak', icon: '', color: '#e74c3c' },
+    { id: 'sungai', label: 'Sungai Kotor', icon: '', color: '#2980b9' },
+    { id: 'sampah', label: 'Tumpukan Sampah', icon: '', color: '#27ae60' },
+    { id: 'lampu', label: 'Lampu Mati', icon: '', color: '#f39c12' },
+    { id: 'banjir', label: 'Banjir', icon: '', color: '#8e44ad' },
+    { id: 'fasilitas', label: 'Fasilitas Umum', icon: '', color: '#16a085' },
+    { id: 'keamanan', label: 'Keamanan', icon: '', color: '#c0392b' },
+    { id: 'lainnya', label: 'Lainnya', icon: '', color: '#7f8c8d' },
 ];
 
 const STATUSES = {
-    dilaporkan: { label: 'Dilaporkan', color: '#e74c3c', icon: '&#x1F534;' },
-    diverifikasi: { label: 'Diverifikasi', color: '#f39c12', icon: '&#x1F7E1;' },
-    diproses: { label: 'Sedang Diproses', color: '#3498db', icon: '&#x1F535;' },
-    selesai: { label: 'Selesai', color: '#27ae60', icon: '&#x2705;' },
+    dilaporkan: { label: 'Dilaporkan', color: '#e74c3c', icon: '' },
+    diverifikasi: { label: 'Diverifikasi', color: '#f39c12', icon: '' },
+    diproses: { label: 'Sedang Diproses', color: '#3498db', icon: '' },
+    selesai: { label: 'Selesai', color: '#27ae60', icon: '' },
 };
 
 const DEPARTMENTS = [
@@ -35,10 +35,10 @@ const LEADERBOARD = [
 ];
 
 const ACHIEVEMENTS = [
-    { id: 'first', icon: '&#x1F3C6;', name: 'Superhero Warga', desc: 'Laporan pertama berhasil dikirim', points: 50 },
-    { id: 'upvote10', icon: '&#x1F31F;', name: 'Pahlawan Lingkungan', desc: '10 laporan mendapat upvote komunitas', points: 200 },
-    { id: 'resolved', icon: '&#x1F4AA;', name: 'Agen Perubahan', desc: '1 laporan berhasil diselesaikan pemerintah', points: 500 },
-    { id: 'reports50', icon: '&#x1F947;', name: 'Penjaga Kota', desc: '50 laporan telah dikirimkan', points: 2500 },
+    { id: 'first', icon: '', name: 'Superhero Warga', desc: 'Laporan pertama berhasil dikirim', points: 50 },
+    { id: 'upvote10', icon: '', name: 'Pahlawan Lingkungan', desc: '10 laporan mendapat upvote komunitas', points: 200 },
+    { id: 'resolved', icon: '', name: 'Agen Perubahan', desc: '1 laporan berhasil diselesaikan pemerintah', points: 500 },
+    { id: 'reports50', icon: '', name: 'Penjaga Kota', desc: '50 laporan telah dikirimkan', points: 2500 },
 ];
 
 const APP_STATS = { totalReports: 12847, resolved: 8934, cities: 34, volunteers: 45230 };
