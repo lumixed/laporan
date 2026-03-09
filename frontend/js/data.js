@@ -160,7 +160,11 @@ async function apiUpdateStatus(reportId, status, department, note) {
 }
 
 async function apiSubmitReport(formData) {
-    const res = await fetch(`${API_BASE}/reports`, { method: 'POST', body: formData });
+    const res = await fetch(`${API_BASE}/reports`, {
+        method: 'POST',
+        headers: { ...getAuthHeaders() },
+        body: formData
+    });
     if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.error || 'Submission failed');
